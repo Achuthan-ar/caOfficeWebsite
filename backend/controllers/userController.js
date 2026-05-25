@@ -1,5 +1,6 @@
 import User from '../models/User.js';
 import Role from '../models/Role.js';
+import AuditLog from '../models/AuditLog.js';
 
 // @desc    Get all users
 // @route   GET /api/users
@@ -59,6 +60,15 @@ export const updateUserRole = async (req, res) => {
       populate: { path: 'permissions' },
     });
 
+    // Log Audit Event
+    await AuditLog.create({
+      user: req.user._id,
+      action: 'User Role Updated',
+      details: `User "${populatedUser.name}" role updated to ${role}`,
+      ipAddress: req.ip || 'unknown',
+      userAgent: req.headers['user-agent'] || 'unknown',
+    });
+
     res.json({
       success: true,
       message: `User role updated successfully to ${role}`,
@@ -91,6 +101,15 @@ export const deleteUser = async (req, res) => {
     }
 
     await User.findByIdAndDelete(req.params.id);
+
+    // Log Audit Event
+    await AuditLog.create({
+      user: req.user._id,
+      action: 'User Deleted',
+      details: `User "${user.name}" account deleted`,
+      ipAddress: req.ip || 'unknown',
+      userAgent: req.headers['user-agent'] || 'unknown',
+    });
 
     res.json({
       success: true,

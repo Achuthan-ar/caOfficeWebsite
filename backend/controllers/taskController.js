@@ -3,7 +3,7 @@ import TaskComment from '../models/TaskComment.js';
 import User from '../models/User.js';
 import Role from '../models/Role.js';
 import { sendNotification } from '../utils/notification.js';
-import { sendTaskAssignmentEmail } from '../services/emailService.js';
+import { sendTaskAssignmentEmail, sendReminderEmail } from '../services/emailService.js';
 import AuditLog from '../models/AuditLog.js';
 
 // Helper: Check if user is Admin or Manager
@@ -378,6 +378,71 @@ export const getTaskComments = async (req, res) => {
       .sort({ createdAt: 1 });
 
     res.json({ success: true, count: comments.length, data: comments });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Trigger reminder emails for tasks due soon or overdue
+// @route   POST /api/tasks/remind-pending
+// @access  Private (Admin, Manager, TL)
+export const remindPendingTasks = async (req, res) => {
+  try {
+    const boundaryDate = new Date(Date.now() + 48 * 60 * 60 * 1000); // 48 hours from now
+    const tasks = await Task.find({
+      status: { $ne: 'Completed' },
+      assignedTo: { $ne: null },
+      dueDate: { $lte: boundaryDate }
+    }).populate('assignedTo', 'name email');
+
+    const sentReminders = [];
+
+    for (const task of tasks) {
+      if (task.assignedTo) {
+        try {
+          const detailStr = `Your assigned task "${task.title}" is due soon (Due Date: ${new Date(task.dueDate).toLocaleDateString()}). Please update your progress on the task board.`;
+          await sendReminderEmail(
+            task.assignedTo.email,
+            task.assignedTo.name,
+            'Upcoming Task Deadline',
+            detailStr
+          );
+          
+          await sendNotification({
+            recipient: task.assignedTo._id,
+            sender: req.user._id,
+            title: 'Urgent Task Reminder',
+            message: `Task "${task.title}" is due soon.`,
+            type: 'Task',
+            link: '/tasks',
+          });
+
+          sentReminders.push({
+            taskId: task._id,
+            taskTitle: task.title,
+            employeeName: task.assignedTo.name,
+            employeeEmail: task.assignedTo.email,
+          });
+        } catch (mailErr) {
+          console.error(`Failed to send reminder to ${task.assignedTo.email}:`, mailErr.message);
+        }
+      }
+    }
+
+    // Log Audit Event
+    await AuditLog.create({
+      user: req.user._id,
+      action: 'Task Reminders Triggered',
+      details: `Triggered deadline reminders for ${sentReminders.length} tasks due within 48 hours`,
+      ipAddress: req.ip || 'unknown',
+      userAgent: req.headers['user-agent'] || 'unknown',
+    });
+
+    res.json({
+      success: true,
+      message: `Triggered ${sentReminders.length} task reminders.`,
+      data: sentReminders,
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

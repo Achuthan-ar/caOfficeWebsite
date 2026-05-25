@@ -2,6 +2,7 @@ import Blog from '../models/Blog.js';
 import Category from '../models/Category.js';
 import Tag from '../models/Tag.js';
 import BlogComment from '../models/BlogComment.js';
+import AuditLog from '../models/AuditLog.js';
 
 // ============================================================================
 // PUBLIC ENDPOINTS
@@ -276,6 +277,15 @@ export const createBlog = async (req, res) => {
       ogImage,
     });
 
+    // Log Audit Event
+    await AuditLog.create({
+      user: req.user._id,
+      action: 'Blog Created',
+      details: `Blog post "${title}" created as ${status || 'Draft'}`,
+      ipAddress: req.ip || 'unknown',
+      userAgent: req.headers['user-agent'] || 'unknown',
+    });
+
     res.status(201).json({ success: true, data: blog });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -312,6 +322,15 @@ export const updateBlog = async (req, res) => {
 
     await blog.save();
 
+    // Log Audit Event
+    await AuditLog.create({
+      user: req.user._id,
+      action: 'Blog Updated',
+      details: `Blog post "${blog.title}" updated`,
+      ipAddress: req.ip || 'unknown',
+      userAgent: req.headers['user-agent'] || 'unknown',
+    });
+
     res.json({ success: true, message: 'Blog updated successfully', data: blog });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -339,6 +358,15 @@ export const deleteBlog = async (req, res) => {
 
     await Blog.findByIdAndDelete(req.params.id);
 
+    // Log Audit Event
+    await AuditLog.create({
+      user: req.user._id,
+      action: 'Blog Deleted',
+      details: `Blog post "${blog.title}" deleted`,
+      ipAddress: req.ip || 'unknown',
+      userAgent: req.headers['user-agent'] || 'unknown',
+    });
+
     res.json({ success: true, message: 'Blog post deleted successfully' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -363,6 +391,15 @@ export const archiveBlog = async (req, res) => {
     blog.status = 'Archived';
     await blog.save();
 
+    // Log Audit Event
+    await AuditLog.create({
+      user: req.user._id,
+      action: 'Blog Archived',
+      details: `Blog post "${blog.title}" archived`,
+      ipAddress: req.ip || 'unknown',
+      userAgent: req.headers['user-agent'] || 'unknown',
+    });
+
     res.json({ success: true, message: 'Blog archived successfully', data: blog });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -386,6 +423,15 @@ export const restoreBlog = async (req, res) => {
 
     blog.status = 'Draft';
     await blog.save();
+
+    // Log Audit Event
+    await AuditLog.create({
+      user: req.user._id,
+      action: 'Blog Restored',
+      details: `Blog post "${blog.title}" restored to Draft status`,
+      ipAddress: req.ip || 'unknown',
+      userAgent: req.headers['user-agent'] || 'unknown',
+    });
 
     res.json({ success: true, message: 'Blog post restored to Draft status', data: blog });
   } catch (error) {

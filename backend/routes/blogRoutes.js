@@ -15,6 +15,7 @@ import {
   restoreBlog,
 } from '../controllers/blogController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
+import { validateSchema, blogSchema } from '../middleware/validationMiddleware.js';
 
 const router = express.Router();
 
@@ -33,7 +34,7 @@ router.post('/post/:slug/comments', protect, createBlogComment); // Any logged-i
 // SECURE ADMIN/MANAGER/TL DASHBOARD ROUTES
 // ============================================================================
 router.get('/admin', protect, authorize('Admin', 'Manager', 'TL'), getAllBlogsAdmin);
-router.post('/admin', protect, authorize('Admin', 'Manager', 'TL'), createBlog);
+router.post('/admin', protect, authorize('Admin', 'Manager', 'TL'), validateSchema(blogSchema), createBlog);
 router.put('/admin/:id', protect, authorize('Admin', 'Manager', 'TL'), updateBlog);
 router.delete('/admin/:id', protect, authorize('Admin', 'Manager', 'TL'), deleteBlog);
 router.put('/admin/:id/archive', protect, authorize('Admin', 'Manager', 'TL'), archiveBlog);

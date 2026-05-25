@@ -1,4 +1,5 @@
 import Notification from '../models/Notification.js';
+import { addSSEClient, removeSSEClient } from '../utils/notification.js';
 
 // @desc    Get user notifications
 // @route   GET /api/notifications
@@ -54,4 +55,38 @@ export const markAllAsRead = async (req, res) => {
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
+};
+
+// @desc    Register SSE Stream for real-time notifications
+// @route   GET /api/notifications/stream
+// @access  Private (All authenticated users)
+export const streamNotifications = (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
+  res.flushHeaders();
+
+  const userId = req.user._id;
+
+  // Add client to memory broker
+  addSSEClient(userId, res);
+
+  // Send initial connected confirmation
+  res.write('data: {"type": "connected"}\n\n');
+
+  // Keep-alive ping interval to prevent connection timeouts on Cloudflare/Render
+  const pingInterval = setInterval(() => {
+    try {
+      res.write('data: {"type": "ping"}\n\n');
+    } catch (err) {
+      clearInterval(pingInterval);
+    }
+  }, 25000);
+
+  req.on('close', () => {
+    clearInterval(pingInterval);
+    removeSSEClient(userId, res);
+    res.end();
+  });
 };

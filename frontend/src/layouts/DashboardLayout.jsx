@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { useNotificationStore } from '../store/notificationStore';
 import api from '../services/api';
 import {
   LayoutDashboard,
@@ -33,10 +34,20 @@ const DashboardLayout = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const dropdownRef = useRef(null);
   
-  // Notification states
-  const [notifications, setNotifications] = useState([]);
+  // Notification Store
+  const {
+    notifications,
+    unreadCount,
+    fetchNotifications,
+    markAsRead,
+    markAllAsRead,
+    connectStream,
+    disconnectStream
+  } = useNotificationStore();
+
   const [isNotifyOpen, setIsNotifyOpen] = useState(false);
   const notifyDropdownRef = useRef(null);
+  const [toast, setToast] = useState(null);
 
   const [isDark, setIsDark] = useState(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -68,49 +79,31 @@ const DashboardLayout = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Fetch notifications
-  const fetchNotifications = async () => {
-    try {
-      const response = await api.get('/notifications');
-      if (response.data?.success) {
-        setNotifications(response.data.data);
-      }
-    } catch (err) {
-      console.error('Error fetching notifications:', err.message);
-    }
-  };
-
   const handleMarkAsRead = async (id, e) => {
     if (e) e.stopPropagation();
-    try {
-      const response = await api.put(`/notifications/${id}/read`);
-      if (response.data?.success) {
-        setNotifications(notifications.map((n) => (n._id === id ? { ...n, isRead: true } : n)));
-      }
-    } catch (err) {
-      console.error('Error marking read:', err.message);
-    }
+    await markAsRead(id);
   };
 
   const handleMarkAllAsRead = async () => {
-    try {
-      const response = await api.put('/notifications/read-all');
-      if (response.data?.success) {
-        setNotifications(notifications.map((n) => ({ ...n, isRead: true })));
-      }
-    } catch (err) {
-      console.error('Error marking all read:', err.message);
-    }
+    await markAllAsRead();
   };
 
   useEffect(() => {
     if (user) {
       fetchNotifications();
-      // Poll notifications every 30 seconds
-      const interval = setInterval(fetchNotifications, 30000);
-      return () => clearInterval(interval);
+      
+      // Establish real-time SSE event stream for live notifications
+      connectStream((newNotify) => {
+        setToast(newNotify);
+        // Autohide toast after 6 seconds
+        setTimeout(() => setToast(null), 6000);
+      });
+
+      return () => {
+        disconnectStream();
+      };
     }
-  }, [user]);
+  }, [user, fetchNotifications, connectStream, disconnectStream]);
 
   const handleLogout = async () => {
     await logout();
@@ -208,8 +201,6 @@ const DashboardLayout = () => {
   };
 
   const currentRoleColor = roleColors[user?.role?.name] || 'bg-slate-500/10 text-slate-500 border border-slate-500/20';
-
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   return (
     <div className="min-h-screen flex bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
@@ -478,11 +469,43 @@ const DashboardLayout = () => {
         </header>
 
         {/* Page Inner Content */}
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-grow overflow-y-auto p-6">
           <div className="mx-auto max-w-7xl">
             <Outlet />
           </div>
         </main>
+
+        {/* Glassmorphic Real-time Toast Alerts */}
+        {toast && (
+          <div 
+            onClick={() => {
+              if (toast.link) navigate(toast.link);
+              setToast(null);
+            }}
+            className="fixed bottom-6 right-6 z-50 flex max-w-sm w-full gap-3 overflow-hidden rounded-xl border border-indigo-100 bg-white/90 dark:bg-slate-900/90 dark:border-slate-800 p-4 shadow-2xl glass glow-primary cursor-pointer transition-all duration-300 transform scale-100 hover:scale-[1.02] active:scale-[0.98] animate-bounce"
+          >
+            <div className="rounded-lg bg-indigo-500 p-2 text-white h-fit shrink-0">
+              <Bell className="h-5 w-5 animate-pulse" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold text-slate-800 dark:text-white font-heading">
+                {toast.title}
+              </p>
+              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 line-clamp-2">
+                {toast.message}
+              </p>
+            </div>
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setToast(null);
+              }}
+              className="text-slate-400 hover:text-slate-650 dark:hover:text-slate-200"
+            >
+              <X className="h-4.5 w-4.5" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

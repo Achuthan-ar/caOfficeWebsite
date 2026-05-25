@@ -6,12 +6,15 @@ import {
   deleteTask,
   addTaskComment,
   getTaskComments,
+  remindPendingTasks,
 } from '../controllers/taskController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
+import { validateSchema, taskSchema } from '../middleware/validationMiddleware.js';
 
 const router = express.Router();
 
-router.post('/', protect, authorize('Admin', 'Manager', 'TL'), createTask);
+router.post('/', protect, authorize('Admin', 'Manager', 'TL'), validateSchema(taskSchema), createTask);
+router.post('/remind-pending', protect, authorize('Admin', 'Manager', 'TL'), remindPendingTasks);
 router.get('/', protect, getTasks);
 router.put('/:id', protect, updateTask);
 router.delete('/:id', protect, authorize('Admin', 'Manager'), deleteTask);

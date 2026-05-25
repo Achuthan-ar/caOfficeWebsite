@@ -3,6 +3,7 @@ import ClientDocument from '../models/ClientDocument.js';
 import User from '../models/User.js';
 import Role from '../models/Role.js';
 import { sendNotification } from '../utils/notification.js';
+import AuditLog from '../models/AuditLog.js';
 
 // @desc    Get active client dashboard details
 // @route   GET /api/clients/dashboard
@@ -96,6 +97,15 @@ export const uploadDocument = async (req, res) => {
       });
     }
 
+    // Log Audit Event
+    await AuditLog.create({
+      user: req.user._id,
+      action: 'Client Document Uploaded',
+      details: `Document "${name}" uploaded for client: ${clientProfile.companyName}`,
+      ipAddress: req.ip || 'unknown',
+      userAgent: req.headers['user-agent'] || 'unknown',
+    });
+
     res.status(201).json({
       success: true,
       message: 'Document uploaded successfully.',
@@ -178,6 +188,15 @@ export const reviewDocument = async (req, res) => {
       link: '/client-dashboard',
     });
 
+    // Log Audit Event
+    await AuditLog.create({
+      user: req.user._id,
+      action: 'Client Document Reviewed',
+      details: `Document "${document.name}" for client: ${document.client.companyName} set to status: ${status}`,
+      ipAddress: req.ip || 'unknown',
+      userAgent: req.headers['user-agent'] || 'unknown',
+    });
+
     res.json({
       success: true,
       message: `Document status updated to: ${status}.`,
@@ -240,6 +259,15 @@ export const updateFilingStatus = async (req, res) => {
       message: 'CA Office has updated your active tax filing tracker profiles.',
       type: 'System',
       link: '/client-dashboard',
+    });
+
+    // Log Audit Event
+    await AuditLog.create({
+      user: req.user._id,
+      action: 'Client Filing Updated',
+      details: `Filing tracker updated for client: ${client.companyName}`,
+      ipAddress: req.ip || 'unknown',
+      userAgent: req.headers['user-agent'] || 'unknown',
     });
 
     res.json({

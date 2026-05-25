@@ -5,15 +5,19 @@ import User from '../models/User.js';
 export const protect = async (req, res, next) => {
   let token;
 
-  // Check for token in Authorization header
+  // Check for token in Authorization header or query parameter (for EventSource support)
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
   ) {
-    try {
-      // Extract token: "Bearer TOKEN_VALUE"
-      token = req.headers.authorization.split(' ')[1];
+    // Extract token: "Bearer TOKEN_VALUE"
+    token = req.headers.authorization.split(' ')[1];
+  } else if (req.query && req.query.token) {
+    token = req.query.token;
+  }
 
+  if (token) {
+    try {
       // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'supersecretkey123456789_ca_office');
 

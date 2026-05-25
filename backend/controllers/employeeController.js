@@ -1,6 +1,7 @@
 import User from '../models/User.js';
 import Role from '../models/Role.js';
 import Department from '../models/Department.js';
+import AuditLog from '../models/AuditLog.js';
 
 // @desc    Get all employees with filters (excluding password, including salary for admin/manager)
 // @route   GET /api/employees
@@ -119,6 +120,15 @@ export const createEmployee = async (req, res) => {
       .populate('role', 'name')
       .populate('department', 'name');
 
+    // Log Audit Event
+    await AuditLog.create({
+      user: req.user._id,
+      action: 'Employee Created',
+      details: `Created employee user: ${name} (${employeeId})`,
+      ipAddress: req.ip || 'unknown',
+      userAgent: req.headers['user-agent'] || 'unknown',
+    });
+
     res.status(201).json({
       success: true,
       message: 'Employee created successfully.',
@@ -204,6 +214,15 @@ export const updateEmployee = async (req, res) => {
       .populate('role', 'name')
       .populate('department', 'name');
 
+    // Log Audit Event
+    await AuditLog.create({
+      user: req.user._id,
+      action: 'Employee Updated',
+      details: `Updated employee profile for user: ${employee.name} (${employee.employeeId})`,
+      ipAddress: req.ip || 'unknown',
+      userAgent: req.headers['user-agent'] || 'unknown',
+    });
+
     res.json({
       success: true,
       message: 'Employee details updated successfully.',
@@ -231,6 +250,15 @@ export const deleteEmployee = async (req, res) => {
     }
 
     await User.findByIdAndDelete(req.params.id);
+
+    // Log Audit Event
+    await AuditLog.create({
+      user: req.user._id,
+      action: 'Employee Deleted',
+      details: `Deleted employee user: ${employee.name} (${employee.employeeId})`,
+      ipAddress: req.ip || 'unknown',
+      userAgent: req.headers['user-agent'] || 'unknown',
+    });
 
     res.json({
       success: true,

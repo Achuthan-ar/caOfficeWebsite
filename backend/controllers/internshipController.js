@@ -3,6 +3,7 @@ import InternshipReport from '../models/InternshipReport.js';
 import Certificate from '../models/Certificate.js';
 import User from '../models/User.js';
 import { sendNotification } from '../utils/notification.js';
+import AuditLog from '../models/AuditLog.js';
 
 // @desc    Get active internship for logged-in Intern
 // @route   GET /api/internships/dashboard
@@ -138,6 +139,15 @@ export const submitReport = async (req, res) => {
       link: `/mentor-workspace`,
     });
 
+    // Log Audit Event
+    await AuditLog.create({
+      user: req.user._id,
+      action: 'Intern Report Submitted',
+      details: `Intern ${req.user.name} submitted a ${reportType} report: "${title}"`,
+      ipAddress: req.ip || 'unknown',
+      userAgent: req.headers['user-agent'] || 'unknown',
+    });
+
     res.status(201).json({
       success: true,
       message: 'Report submitted successfully.',
@@ -184,6 +194,15 @@ export const reviewReport = async (req, res) => {
       message: `Your ${report.reportType} report has been graded with rating ${rating}/5.`,
       type: 'System',
       link: '/intern-portal',
+    });
+
+    // Log Audit Event
+    await AuditLog.create({
+      user: req.user._id,
+      action: 'Intern Report Reviewed',
+      details: `Report for internship ID ${internship._id} reviewed and rated ${rating}/5`,
+      ipAddress: req.ip || 'unknown',
+      userAgent: req.headers['user-agent'] || 'unknown',
     });
 
     res.json({
@@ -241,6 +260,15 @@ export const assignTask = async (req, res) => {
       message: `Your mentor assigned a new task: "${title}".`,
       type: 'System',
       link: '/intern-portal',
+    });
+
+    // Log Audit Event
+    await AuditLog.create({
+      user: req.user._id,
+      action: 'Mentor Task Assigned',
+      details: `Assigned learning task "${title}" to intern user associated with internship ID ${internship._id}`,
+      ipAddress: req.ip || 'unknown',
+      userAgent: req.headers['user-agent'] || 'unknown',
     });
 
     res.status(201).json({
@@ -369,6 +397,15 @@ export const generateCertificate = async (req, res) => {
       message: `Congratulations! Your internship certificate has been issued. Click here to view.`,
       type: 'System',
       link: `/certificate/${certificate._id}`,
+    });
+
+    // Log Audit Event
+    await AuditLog.create({
+      user: req.user._id,
+      action: 'Intern Certificate Generated',
+      details: `Certificate generated for intern: ${internship.user.name} (Internship ID: ${internship._id})`,
+      ipAddress: req.ip || 'unknown',
+      userAgent: req.headers['user-agent'] || 'unknown',
     });
 
     res.status(201).json({
