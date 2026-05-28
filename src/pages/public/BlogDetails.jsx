@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import axios from 'axios';
 import { useAuthStore } from '../../store/authStore';
 import api from '../../services/api';
 import {
@@ -26,26 +25,23 @@ const BlogDetails = () => {
   
   const [commentText, setCommentText] = useState('');
   const [loading, setLoading] = useState(true);
-  const [loadingComments, setLoadingComments] = useState(false);
   const [commentSubmitting, setCommentSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
       // 1. Fetch Blog post details
-      const blogRes = await axios.get(`${API_URL}/blogs/post/${slug}`);
+      const blogRes = await api.get(`/blogs/post/${slug}`);
       if (blogRes.data?.success) {
         const blogDoc = blogRes.data.data;
         setBlog(blogDoc);
 
         // 2. Fetch comments and related blogs concurrently
         const [commentsRes, relatedRes] = await Promise.all([
-          axios.get(`${API_URL}/blogs/post/${slug}/comments`),
-          axios.get(`${API_URL}/blogs/post/${slug}/related`),
+          api.get(`/blogs/post/${slug}/comments`),
+          api.get(`/blogs/post/${slug}/related`),
         ]);
 
         if (commentsRes.data?.success) setComments(commentsRes.data.data);
@@ -59,11 +55,11 @@ const BlogDetails = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [slug]);
 
   useEffect(() => {
     fetchData();
-  }, [slug]);
+  }, [fetchData]);
 
   const handleCommentSubmit = async (e) => {
     e.preventDefault();

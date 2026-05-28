@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../services/api';
 import { Search, RotateCw, ArrowRight, Eye, Calendar, User, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const BlogDirectory = () => {
@@ -14,37 +14,31 @@ const BlogDirectory = () => {
   const [totalPages, setTotalPages] = useState(1);
   
   const [loading, setLoading] = useState(true);
-  const [loadingCats, setLoadingCats] = useState(true);
   const [error, setError] = useState('');
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
-  const fetchCategories = async () => {
-    setLoadingCats(true);
+  const fetchCategories = useCallback(async () => {
     try {
-      const res = await axios.get(`${API_URL}/categories`);
+      const res = await api.get('/categories');
       if (res.data?.success) {
         setCategories(res.data.data);
       }
     } catch (err) {
       console.error('Error fetching categories:', err.message);
-    } finally {
-      setLoadingCats(false);
     }
-  };
+  }, []);
 
-  const fetchFeatured = async () => {
+  const fetchFeatured = useCallback(async () => {
     try {
-      const res = await axios.get(`${API_URL}/blogs/featured`);
+      const res = await api.get('/blogs/featured');
       if (res.data?.success) {
         setFeaturedBlog(res.data.data);
       }
     } catch (err) {
       console.error('Error fetching featured blog:', err.message);
     }
-  };
+  }, []);
 
-  const fetchBlogs = async () => {
+  const fetchBlogs = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
@@ -55,7 +49,7 @@ const BlogDirectory = () => {
       if (search) params.search = search;
       if (selectedCategory) params.category = selectedCategory;
 
-      const res = await axios.get(`${API_URL}/blogs`, { params });
+      const res = await api.get('/blogs', { params });
       if (res.data?.success) {
         setBlogs(res.data.data);
         setTotalPages(res.data.totalPages);
@@ -68,16 +62,16 @@ const BlogDirectory = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, selectedCategory, search]);
 
   useEffect(() => {
     fetchCategories();
     fetchFeatured();
-  }, []);
+  }, [fetchCategories, fetchFeatured]);
 
   useEffect(() => {
     fetchBlogs();
-  }, [currentPage, selectedCategory, search]);
+  }, [fetchBlogs]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();

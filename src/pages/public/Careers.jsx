@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Briefcase, MapPin, Award, CheckCircle, FileUp, Send, Search, Filter, X, Phone, Mail, BookOpen, Layers } from 'lucide-react';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import { useState, useEffect } from 'react';
+import api from '../../services/api';
+import { Briefcase, MapPin, Award, CheckCircle, FileUp, Send, Search, Filter, X, Phone, BookOpen, Layers } from 'lucide-react';
 
 const Careers = () => {
   const [jobs, setJobs] = useState([]);
@@ -36,7 +34,7 @@ const Careers = () => {
     const fetchJobs = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`${API_URL}/careers/jobs`);
+        const res = await api.get('/careers/jobs');
         if (res.data?.success) {
           setJobs(res.data.data);
         }
@@ -69,7 +67,7 @@ const Careers = () => {
     setSubmitLoading(true);
     setFormError('');
     try {
-      const res = await axios.post(`${API_URL}/careers/apply`, {
+      const res = await api.post('/careers/apply', {
         jobId: selectedJob._id,
         ...formData
       });

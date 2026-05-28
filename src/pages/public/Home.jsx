@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../services/api';
 import {
   ArrowRight,
   ShieldCheck,
@@ -11,7 +11,6 @@ import {
   Clock,
   TrendingUp,
   MessageSquare,
-  Bookmark,
 } from 'lucide-react';
 
 const Home = () => {
@@ -21,8 +20,7 @@ const Home = () => {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-        const response = await axios.get(`${API_URL}/blogs/recent`);
+        const response = await api.get('/blogs/recent');
         if (response.data?.success) {
           setRecentBlogs(response.data.data);
         }
