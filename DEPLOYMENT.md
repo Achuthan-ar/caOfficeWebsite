@@ -79,9 +79,9 @@ Cloudinary handles secure uploads for client financial documents, applicant resu
 ### On Vercel:
 1. Create a new project pointing to your Git repository.
 2. Set the **Framework Preset** to `Vite`.
-3. Set the **Root Directory** to `frontend`.
+3. Leave the **Root Directory** as default (repository root).
 4. Add `VITE_API_URL` in Vercel's Environment Variables panel.
-5. In order to handle React Router client-side routing fallback redirects correctly in production, add a `vercel.json` configuration file in the `frontend` root:
+5. In order to handle React Router client-side routing fallback redirects correctly in production, add a `vercel.json` configuration file in the repository root:
    ```json
    {
      "rewrites": [
@@ -92,7 +92,7 @@ Cloudinary handles secure uploads for client financial documents, applicant resu
 
 ### On Netlify:
 1. Create a new site from Git, mapping to the repository.
-2. Set the **Base Directory** to `frontend`.
+2. Leave the **Base Directory** as default (repository root).
 3. Build Settings:
    - **Build Command**: `npm run build`
    - **Publish Directory**: `dist`
