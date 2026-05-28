@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import { 
   FileText, Upload, Download, CheckCircle, AlertCircle, Clock, 
-  Send, Plus, FileUp, X, Bell, Info, Landmark, Layers
+  Send, Plus, FileUp, X, Bell, Info, Landmark, Layers, ExternalLink
 } from 'lucide-react';
 
 const ClientDashboard = () => {

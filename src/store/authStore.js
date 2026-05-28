@@ -118,7 +118,7 @@ export const useAuthStore = create((set, get) => ({
       } else {
         set({ isLoading: false, isAuthenticated: false });
       }
-    } catch (error) {
+    } catch {
       // Session does not exist or has expired
       set({
         user: null,

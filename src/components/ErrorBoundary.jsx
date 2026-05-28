@@ -43,7 +43,7 @@ export class ErrorBoundary extends React.Component {
             </p>
 
             {/* If in dev mode, render the details */}
-            {process.env.NODE_ENV === 'development' && this.state.error && (
+            {import.meta.env.DEV && this.state.error && (
               <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 mb-6 text-left max-h-36 overflow-y-auto">
                 <p className="text-[10px] font-mono text-red-500 font-bold uppercase tracking-wider mb-1">
                   Error Details:

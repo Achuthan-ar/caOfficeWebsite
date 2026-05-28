@@ -22,6 +22,7 @@ import {
   History,
   Send,
   Loader2,
+  Tag,
 } from 'lucide-react';
 
 const TaskKanban = () => {

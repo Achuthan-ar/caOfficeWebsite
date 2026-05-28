@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { 
   CheckSquare, Square, FileText, Send, Calendar, Award, 
-  BookOpen, CheckCircle, Clock, Plus, ExternalLink, ShieldAlert, Award as CertificateIcon 
+  BookOpen, CheckCircle, Clock, Plus, ExternalLink, ShieldAlert, Award as CertificateIcon,
+  X
 } from 'lucide-react';
 
 const InternPortal = () => {
