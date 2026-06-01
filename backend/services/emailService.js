@@ -282,3 +282,77 @@ export const sendReminderEmail = async (email, name, reminderType, details) => {
   return true;
 };
 
+export const sendOtpEmail = async (email, otp) => {
+  const transporter = await getTransporter();
+  const mailOptions = {
+    from: `"CA Office Support" <${process.env.FROM_EMAIL || 'support@caoffice.com'}>`,
+    to: email,
+    subject: 'Email Verification Code - CA Office',
+    text: `Hello,\n\nYour one-time verification code is: ${otp}\n\nThis code is valid for 5 minutes. If you did not request this, please ignore this email.\n\nBest regards,\nCA Office Support`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+        <h2 style="color: #2563eb; text-align: center;">CA Office ERP</h2>
+        <p>Hello,</p>
+        <p>Thank you for registering with CA Office ERP. Please use the following one-time verification code (OTP) to verify your email address:</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <span style="font-size: 2.2rem; font-weight: 950; letter-spacing: 6px; color: #2563eb; background-color: #f3f4f6; padding: 12px 30px; border-radius: 8px; border: 1px dashed #2563eb; display: inline-block;">
+            ${otp}
+          </span>
+        </div>
+        <p style="font-size: 0.85rem; color: #ef4444; font-weight: bold; text-align: center;">
+          * This verification code is valid for 5 minutes only.
+        </p>
+        <p style="font-size: 0.875rem; color: #6b7280; margin-top: 30px; border-top: 1px solid #eee; padding-top: 10px;">
+          If you did not request this code, you can safely ignore this email.
+        </p>
+      </div>
+    `,
+  };
+
+  const info = await transporter.sendMail(mailOptions);
+  const previewUrl = nodemailer.getTestMessageUrl(info);
+  if (previewUrl) {
+    console.log(`OTP verification email sent. Preview URL: ${previewUrl}`);
+  }
+  return true;
+};
+
+export const sendOneTimeRegistrationEmail = async (email, name, password, managerName, managerEmail, roleName) => {
+  const transporter = await getTransporter();
+  const mailOptions = {
+    from: `"${managerName} (via CA Office)" <${managerEmail}>`,
+    to: email,
+    replyTo: managerEmail,
+    subject: 'One-Time ERP Portal Registration - CA Office',
+    text: `Hello ${name},\n\nYou have been registered as a ${roleName} at CA Office by your Manager, ${managerName}.\n\nYour one-time login credentials:\nEmail: ${email}\nTemporary Password: ${password}\n\nPlease login at http://localhost:5173/login to access the portal and update your password immediately.\n\nBest regards,\nCA Office HR Operations`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+        <h2 style="color: #2563eb; text-align: center;">CA Office ERP</h2>
+        <p>Hello <strong>${name}</strong>,</p>
+        <p>You have been registered as an active <strong>${roleName}</strong> in our ERP system by your Manager, <strong>${managerName}</strong>.</p>
+        <div style="background-color: #f3f4f6; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #2563eb;">
+          <p style="margin: 0 0 8px 0;"><strong>Your Temporary Credentials:</strong></p>
+          <p style="margin: 0 0 5px 0;"><strong>Username / Email:</strong> ${email}</p>
+          <p style="margin: 0;"><strong>One-Time Password:</strong> ${password}</p>
+        </div>
+        <div style="text-align: center; margin: 25px 0;">
+          <a href="http://localhost:5173/login" style="background-color: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Login to Portal</a>
+        </div>
+        <p style="font-size: 0.85rem; color: #ef4444; font-weight: bold;">
+          * Please change your password immediately after logging in for security.
+        </p>
+        <p style="font-size: 0.875rem; color: #6b7280; margin-top: 30px; border-top: 1px solid #eee; padding-top: 10px;">
+          Sent on behalf of:<br><strong>${managerName}</strong> (<a href="mailto:${managerEmail}">${managerEmail}</a>)
+        </p>
+      </div>
+    `,
+  };
+
+  const info = await transporter.sendMail(mailOptions);
+  const previewUrl = nodemailer.getTestMessageUrl(info);
+  if (previewUrl) {
+    console.log(`One-time registration credentials email sent. Preview URL: ${previewUrl}`);
+  }
+  return true;
+};
+

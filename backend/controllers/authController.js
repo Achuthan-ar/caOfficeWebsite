@@ -2,8 +2,10 @@ import crypto from 'crypto';
 import User from '../models/User.js';
 import Role from '../models/Role.js';
 import Session from '../models/Session.js';
+import Client from '../models/Client.js';
+import Otp from '../models/Otp.js';
 import jwt from 'jsonwebtoken';
-import { sendPasswordResetEmail } from '../services/emailService.js';
+import { sendPasswordResetEmail, sendOtpEmail } from '../services/emailService.js';
 import AuditLog from '../models/AuditLog.js';
 
 // Helper to generate access token
@@ -34,11 +36,41 @@ const createSession = async (userId, refreshToken, req) => {
   });
 };
 
+// @desc    Send OTP for email verification
+// @route   POST /api/auth/send-otp
+// @access  Public
+export const sendOtp = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ success: false, message: 'Please provide an email address' });
+  }
+
+  try {
+    // Generate secure 6-digit random code
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Store in Otp collection (overwrite any previous OTP for this email)
+    await Otp.findOneAndUpdate(
+      { email: email.toLowerCase() },
+      { otp, createdAt: new Date() },
+      { upsert: true, new: true }
+    );
+
+    // Send email
+    await sendOtpEmail(email, otp);
+
+    res.json({ success: true, message: 'Verification code sent to your email.' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 // @desc    Register a new user
 // @route   POST /api/auth/register
 // @access  Public
 export const registerUser = async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password, role, otp, phone, companyName, panNumber, gstin } = req.body;
 
   try {
     // Check if user already exists
@@ -54,14 +86,58 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ success: false, message: `Role ${roleName} does not exist` });
     }
 
+    // Enforce OTP, phone, and company validations for Clients registering themselves
+    if (roleName === 'Client') {
+      if (!otp) {
+        return res.status(400).json({ success: false, message: 'Verification code (OTP) is required for registration' });
+      }
+      if (!phone) {
+        return res.status(400).json({ success: false, message: 'Mobile/Phone number is required for client registration' });
+      }
+      if (!companyName) {
+        return res.status(400).json({ success: false, message: 'Company/Business name is required for client registration' });
+      }
+
+      // Check OTP in DB
+      const otpRecord = await Otp.findOne({ email: email.toLowerCase(), otp });
+      if (!otpRecord) {
+        return res.status(400).json({ success: false, message: 'Invalid or expired verification code (OTP)' });
+      }
+
+      // Delete verified OTP record
+      await Otp.deleteOne({ _id: otpRecord._id });
+    }
+
     const user = await User.create({
       name,
       email,
       password,
       role: roleDoc._id,
+      phone: phone || '',
     });
 
     if (user) {
+      // Create Client Profile if role is Client
+      if (roleName === 'Client') {
+        const clientCount = await Client.countDocuments();
+        const serialNum = 101 + clientCount;
+        const now = new Date();
+        const DD = String(now.getDate()).padStart(2, '0');
+        const MM = String(now.getMonth() + 1).padStart(2, '0');
+        const dateStr = `${DD}${MM}`;
+        const phoneClean = String(phone).replace(/\s+/g, '');
+        const lastTwo = phoneClean.slice(-2);
+        const generatedClientId = `${serialNum}${dateStr}${lastTwo}`;
+
+        await Client.create({
+          user: user._id,
+          clientId: generatedClientId,
+          companyName,
+          panNumber: panNumber || '',
+          gstin: gstin || '',
+        });
+      }
+
       const accessToken = generateAccessToken(user._id);
       const refreshToken = generateRefreshToken(user._id);
 

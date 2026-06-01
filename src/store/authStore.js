@@ -41,6 +41,48 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
+  register: async (payload) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axios.post(
+        `${API_URL}/auth/register`,
+        payload,
+        { withCredentials: true }
+      );
+      
+      const { data } = response.data;
+      set({
+        user: {
+          id: data._id,
+          name: data.name,
+          email: data.email,
+          role: data.role,
+        },
+        accessToken: data.token,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+      return { success: true };
+    } catch (error) {
+      const message = error.response?.data?.message || 'Registration failed';
+      set({ isLoading: false, error: message });
+      return { success: false, message };
+    }
+  },
+
+  sendOtp: async (email) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axios.post(`${API_URL}/auth/send-otp`, { email });
+      set({ isLoading: false });
+      return { success: true, message: response.data.message };
+    } catch (error) {
+      const message = error.response?.data?.message || 'Failed to send verification code';
+      set({ isLoading: false, error: message });
+      return { success: false, message };
+    }
+  },
+
   logout: async () => {
     set({ isLoading: true });
     try {

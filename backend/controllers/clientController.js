@@ -5,6 +5,78 @@ import Role from '../models/Role.js';
 import { sendNotification } from '../utils/notification.js';
 import AuditLog from '../models/AuditLog.js';
 
+// @desc    Create a new client account and profile
+// @route   POST /api/clients
+// @access  Private (Admin & Manager)
+export const createClient = async (req, res) => {
+  const { name, email, password, phone, companyName, panNumber, gstin } = req.body;
+
+  if (!name || !email || !phone || !companyName) {
+    return res.status(400).json({ success: false, message: 'Name, email, phone, and Company Name are required' });
+  }
+
+  try {
+    // Check if email already exists
+    const emailExists = await User.findOne({ email });
+    if (emailExists) {
+      return res.status(400).json({ success: false, message: 'Email already registered' });
+    }
+
+    const clientRoleDoc = await Role.findOne({ name: 'Client' });
+    if (!clientRoleDoc) {
+      return res.status(404).json({ success: false, message: 'Client role not found' });
+    }
+
+    // Create user
+    const user = await User.create({
+      name,
+      email,
+      password: password || 'welcome123',
+      role: clientRoleDoc._id,
+      phone,
+    });
+
+    // Generate Client ID
+    const clientCount = await Client.countDocuments();
+    const serialNum = 101 + clientCount;
+    const now = new Date();
+    const DD = String(now.getDate()).padStart(2, '0');
+    const MM = String(now.getMonth() + 1).padStart(2, '0');
+    const dateStr = `${DD}${MM}`;
+    const phoneClean = String(phone).replace(/\s+/g, '');
+    const lastTwo = phoneClean.slice(-2);
+    const generatedClientId = `${serialNum}${dateStr}${lastTwo}`;
+
+    // Create client profile
+    const client = await Client.create({
+      user: user._id,
+      clientId: generatedClientId,
+      companyName,
+      panNumber: panNumber || '',
+      gstin: gstin || '',
+    });
+
+    const populatedClient = await Client.findById(client._id).populate('user', 'name email phone');
+
+    // Log Audit Event
+    await AuditLog.create({
+      user: req.user._id,
+      action: 'Client Created',
+      details: `Created client account: ${name} (${generatedClientId})`,
+      ipAddress: req.ip || 'unknown',
+      userAgent: req.headers['user-agent'] || 'unknown',
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Client profile and account created successfully.',
+      data: populatedClient,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 // @desc    Get active client dashboard details
 // @route   GET /api/clients/dashboard
 // @access  Private (Client only)

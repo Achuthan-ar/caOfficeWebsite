@@ -1,6 +1,7 @@
 import User from '../models/User.js';
 import Role from '../models/Role.js';
 import AuditLog from '../models/AuditLog.js';
+import Client from '../models/Client.js';
 
 // @desc    Get all users
 // @route   GET /api/users
@@ -12,6 +13,7 @@ export const getAllUsers = async (req, res) => {
         path: 'role',
         populate: { path: 'permissions' },
       })
+      .populate('department', 'name')
       .sort({ createdAt: -1 });
 
     res.json({
@@ -99,6 +101,9 @@ export const deleteUser = async (req, res) => {
     if (user._id.toString() === req.user._id.toString()) {
       return res.status(400).json({ success: false, message: 'Cannot delete your own account' });
     }
+
+    // Cascade delete client profile if user is a client
+    await Client.deleteOne({ user: user._id });
 
     await User.findByIdAndDelete(req.params.id);
 

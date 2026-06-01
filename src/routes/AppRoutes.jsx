@@ -97,8 +97,8 @@ const AppRoutes = () => {
               <Route path="/intern-portal" element={<InternPortal />} />
               <Route path="/certificate/:id" element={<CertificateView />} />
               
-              {/* Create/Edit Task - Admin, Manager, and TL only */}
-              <Route element={<ProtectedRoute allowedRoles={['Admin', 'Manager', 'TL']} />}>
+              {/* Create/Edit Task - Manager and TL only */}
+              <Route element={<ProtectedRoute allowedRoles={['Manager', 'TL']} />}>
                 <Route path="/task-form" element={<TaskForm />} />
                 <Route path="/task-form/:id" element={<TaskForm />} />
               </Route>

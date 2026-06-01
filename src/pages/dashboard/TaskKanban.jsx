@@ -49,6 +49,7 @@ const TaskKanban = () => {
   const [editLoading, setEditLoading] = useState(false);
 
   const isPrivileged = ['Admin', 'Manager', 'TL'].includes(currentUser?.role?.name);
+  const isAdmin = currentUser?.role?.name === 'Admin';
 
   const fetchTasks = useCallback(async () => {
     setLoading(true);
@@ -256,7 +257,7 @@ const TaskKanban = () => {
           </div>
         </div>
 
-        {isPrivileged && (
+        {isPrivileged && !isAdmin && (
           <Link
             to="/task-form"
             className="inline-flex items-center gap-2 rounded-xl bg-indigo-500 text-white px-4 py-2 text-sm font-semibold hover:bg-indigo-600 transition-all shadow-lg shadow-indigo-500/15 cursor-pointer active:scale-95"
@@ -421,25 +422,27 @@ const TaskKanban = () => {
                           </div>
 
                           {/* Card Arrows simulator Controls */}
-                          <div
-                            className="flex justify-end gap-1.5 pt-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                            onClick={(e) => e.stopPropagation()} // Stop opening details modal
-                          >
-                            <button
-                              onClick={() => handleMoveStatus(task._id, task.status, -1)}
-                              className="p-1 rounded bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 text-slate-500 hover:text-slate-700 cursor-pointer"
-                              title="Move Left"
+                          {!isAdmin && (
+                            <div
+                              className="flex justify-end gap-1.5 pt-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                              onClick={(e) => e.stopPropagation()} // Stop opening details modal
                             >
-                              <ArrowLeft className="h-3.5 w-3.5" />
-                            </button>
-                            <button
-                              onClick={() => handleMoveStatus(task._id, task.status, 1)}
-                              className="p-1 rounded bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 text-slate-500 hover:text-slate-700 cursor-pointer"
-                              title="Move Right"
-                            >
-                              <ArrowRight className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
+                              <button
+                                onClick={() => handleMoveStatus(task._id, task.status, -1)}
+                                className="p-1 rounded bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 text-slate-500 hover:text-slate-700 cursor-pointer"
+                                title="Move Left"
+                              >
+                                <ArrowLeft className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                onClick={() => handleMoveStatus(task._id, task.status, 1)}
+                                className="p-1 rounded bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 text-slate-500 hover:text-slate-700 cursor-pointer"
+                                title="Move Right"
+                              >
+                                <ArrowRight className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          )}
                         </div>
                       );
                     })
@@ -477,7 +480,7 @@ const TaskKanban = () => {
               </div>
 
               <div className="flex items-center gap-2">
-                {isPrivileged && (
+                {isPrivileged && !isAdmin && (
                   <>
                     <Link
                       to={`/task-form/${activeTask._id}`}
@@ -521,14 +524,22 @@ const TaskKanban = () => {
                   <span className="font-bold text-slate-800 dark:text-white uppercase tracking-wider text-[10px]">Update Progress & Status</span>
                 </div>
 
+                {isAdmin && (
+                  <div className="text-[10px] font-bold text-amber-500 uppercase tracking-wide bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+                    <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                    Read-Only: Admin cannot update task progress
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Status Dropdown */}
                   <div className="space-y-1">
                     <label className="text-[10px] font-bold text-slate-450 block uppercase">Status</label>
                     <select
+                      disabled={isAdmin}
                       value={taskStatus}
                       onChange={(e) => setTaskStatus(e.target.value)}
-                      className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 dark:text-slate-200 focus:outline-none cursor-pointer"
+                      className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 dark:text-slate-200 focus:outline-none cursor-pointer disabled:opacity-60"
                     >
                       <option value="Pending">Pending</option>
                       <option value="In Progress">In Progress</option>
@@ -549,9 +560,10 @@ const TaskKanban = () => {
                         min="0"
                         max="100"
                         step="5"
+                        disabled={isAdmin}
                         value={taskProgress}
                         onChange={(e) => setTaskProgress(Number(e.target.value))}
-                        className="flex-1 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                        className="flex-1 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 disabled:opacity-50"
                       />
                     </div>
                   </div>
@@ -565,10 +577,11 @@ const TaskKanban = () => {
                       <Paperclip className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
                       <input
                         type="text"
-                        placeholder="Google Drive, PDF, or sheets link..."
+                        disabled={isAdmin}
+                        placeholder={isAdmin ? "Attachments locked in read-only mode" : "Google Drive, PDF, or sheets link..."}
                         value={attachmentLink}
                         onChange={(e) => setAttachmentLink(e.target.value)}
-                        className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-700 dark:text-slate-200 focus:outline-none"
+                        className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-700 dark:text-slate-200 focus:outline-none disabled:opacity-60"
                       />
                     </div>
                   </div>
@@ -593,16 +606,18 @@ const TaskKanban = () => {
                 </div>
 
                 {/* Save button */}
-                <div className="flex justify-end pt-1">
-                  <button
-                    onClick={handleSaveDetailsEdits}
-                    disabled={editLoading}
-                    className="inline-flex items-center gap-1.5 bg-indigo-500 text-white font-bold py-1.5 px-3 rounded-lg text-[10px] uppercase cursor-pointer hover:bg-indigo-600 transition active:scale-95 disabled:opacity-50"
-                  >
-                    {editLoading && <Loader2 className="h-3 w-3 animate-spin" />}
-                    Save Progress
-                  </button>
-                </div>
+                {!isAdmin && (
+                  <div className="flex justify-end pt-1">
+                    <button
+                      onClick={handleSaveDetailsEdits}
+                      disabled={editLoading}
+                      className="inline-flex items-center gap-1.5 bg-indigo-500 text-white font-bold py-1.5 px-3 rounded-lg text-[10px] uppercase cursor-pointer hover:bg-indigo-600 transition active:scale-95 disabled:opacity-50"
+                    >
+                      {editLoading && <Loader2 className="h-3 w-3 animate-spin" />}
+                      Save Progress
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Activity Log logs list */}

@@ -14,7 +14,7 @@ import {
   Mail,
   Phone,
   Calendar,
-  DollarSign,
+  IndianRupee,
   UserCheck,
   Building,
 } from 'lucide-react';
@@ -290,7 +290,7 @@ const EmployeeList = () => {
                         {/* Salary */}
                         <td className="py-4 px-4 font-bold text-slate-800 dark:text-slate-200">
                           <div className="flex items-center gap-1">
-                            <DollarSign className="h-3.5 w-3.5 text-slate-400" />
+                            <IndianRupee className="h-3.5 w-3.5 text-slate-400" />
                             <span>{formatCurrency(emp.salary)}</span>
                           </div>
                         </td>

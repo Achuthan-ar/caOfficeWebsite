@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
+import { useAuthStore } from '../../store/authStore';
 import {
   Clock,
   CheckCircle,
@@ -14,6 +15,7 @@ import {
 } from 'lucide-react';
 
 const AttendanceClock = () => {
+  const { user } = useAuthStore();
   const [time, setTime] = useState(new Date());
   const [stats, setStats] = useState(null);
   const [history, setHistory] = useState([]);
@@ -241,7 +243,11 @@ const AttendanceClock = () => {
 
           {/* Action CTAs */}
           <div className="space-y-3">
-            {!checkedIn ? (
+            {user?.role?.name === 'Admin' ? (
+              <div className="w-full text-center py-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold rounded-xl text-slate-500 uppercase tracking-wide">
+                Admin Read-Only Access
+              </div>
+            ) : !checkedIn ? (
               <button
                 disabled={actionLoading}
                 onClick={handleCheckIn}

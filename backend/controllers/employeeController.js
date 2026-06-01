@@ -2,6 +2,7 @@ import User from '../models/User.js';
 import Role from '../models/Role.js';
 import Department from '../models/Department.js';
 import AuditLog from '../models/AuditLog.js';
+import { sendOneTimeRegistrationEmail } from '../services/emailService.js';
 
 // @desc    Get all employees with filters (excluding password, including salary for admin/manager)
 // @route   GET /api/employees
@@ -119,6 +120,20 @@ export const createEmployee = async (req, res) => {
       .select('+salary')
       .populate('role', 'name')
       .populate('department', 'name');
+
+    // Trigger one-time registration welcome email to the new employee on behalf of the registering manager
+    try {
+      await sendOneTimeRegistrationEmail(
+        populatedEmployee.email,
+        populatedEmployee.name,
+        password || 'welcome123',
+        req.user.name,
+        req.user.email,
+        populatedEmployee.role?.name || 'Employee'
+      );
+    } catch (err) {
+      console.error('Failed to send one-time welcome credentials email:', err.message);
+    }
 
     // Log Audit Event
     await AuditLog.create({

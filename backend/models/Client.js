@@ -9,6 +9,11 @@ const clientSchema = new mongoose.Schema(
       unique: true,
       index: true,
     },
+    clientId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
     companyName: {
       type: String,
       required: [true, 'Please provide business name'],

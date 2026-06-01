@@ -7,6 +7,7 @@ import {
   logoutUser,
   forgotPassword,
   resetPassword,
+  sendOtp,
 } from '../controllers/authController.js';
 import { protect } from '../middleware/authMiddleware.js';
 import { validateSchema, loginSchema, registerSchema } from '../middleware/validationMiddleware.js';
@@ -15,6 +16,7 @@ const router = express.Router();
 
 router.post('/register', validateSchema(registerSchema), registerUser);
 router.post('/login', validateSchema(loginSchema), loginUser);
+router.post('/send-otp', sendOtp);
 router.post('/refresh-token', refreshUserToken);
 router.post('/logout', logoutUser);
 router.post('/forgot-password', forgotPassword);
