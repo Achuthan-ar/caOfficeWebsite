@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { Briefcase, Sun, Moon, Menu, X, ArrowRight, ShieldCheck, Mail, MapPin, Phone } from 'lucide-react';
 
 const PublicLayout = () => {
   const { isAuthenticated } = useAuthStore();
-  const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDark, setIsDark] = useState(() => {

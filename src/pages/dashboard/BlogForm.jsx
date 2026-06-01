@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useAuthStore } from '../../store/authStore';
 import api from '../../services/api';
 import {
-  FileText,
   Save,
   ArrowLeft,
   ChevronDown,
@@ -17,6 +16,7 @@ import {
 } from 'lucide-react';
 
 const BlogForm = () => {
+  "use no memo";
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuthStore();
@@ -38,7 +38,6 @@ const BlogForm = () => {
     handleSubmit,
     reset,
     watch,
-    setValue,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -58,11 +57,8 @@ const BlogForm = () => {
   });
 
   const contentValue = watch('content', '');
-  const titleValue = watch('title', '');
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
-  const fetchTaxonomy = async () => {
+  const fetchTaxonomy = useCallback(async () => {
     try {
       const [catRes, tagRes] = await Promise.all([
         api.get('/categories'),
@@ -73,9 +69,9 @@ const BlogForm = () => {
     } catch (err) {
       console.error('Error fetching taxonomies:', err.message);
     }
-  };
+  }, []);
 
-  const fetchBlogDetails = async () => {
+  const fetchBlogDetails = useCallback(async () => {
     if (!id) return;
     setLoading(true);
     setErrorMsg('');
@@ -111,14 +107,14 @@ const BlogForm = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, reset]);
 
   useEffect(() => {
     fetchTaxonomy();
     if (id) {
       fetchBlogDetails();
     }
-  }, [id]);
+  }, [id, fetchTaxonomy, fetchBlogDetails]);
 
   const onSubmit = async (data) => {
     setSaving(true);

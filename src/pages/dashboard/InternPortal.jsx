@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { 
-  CheckSquare, Square, FileText, Send, Calendar, Award, 
+  CheckSquare, Square, Send, Calendar, 
   BookOpen, CheckCircle, Clock, Plus, ExternalLink, ShieldAlert, Award as CertificateIcon,
   X
 } from 'lucide-react';

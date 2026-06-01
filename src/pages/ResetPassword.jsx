@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useParams } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { Lock, Loader2, ArrowLeft, CheckCircle2 } from 'lucide-react';
 
 const ResetPassword = () => {
+  "use no memo";
   const { token } = useParams();
   const { resetPassword, isLoading } = useAuthStore();
   const [successMsg, setSuccessMsg] = useState('');

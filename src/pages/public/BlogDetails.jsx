@@ -17,7 +17,7 @@ import {
 
 const BlogDetails = () => {
   const { slug } = useParams();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   
   const [blog, setBlog] = useState(null);
   const [comments, setComments] = useState([]);

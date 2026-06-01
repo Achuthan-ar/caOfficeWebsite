@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuthStore } from '../store/authStore';
 import api from '../services/api';
 import {
@@ -10,7 +10,6 @@ import {
   Shield,
   Clock,
   Mail,
-  UserCheck,
 } from 'lucide-react';
 
 const UsersList = () => {

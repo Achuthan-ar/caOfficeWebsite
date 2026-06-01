@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../../services/api';
 import { 
-  FileText, Search, User, Mail, Phone, Calendar, 
-  ExternalLink, Edit, CheckCircle, XCircle, Award, Clock, ArrowRight, UserPlus
+  FileText, Search, Mail, Phone, Calendar, 
+  ExternalLink, CheckCircle, XCircle, UserPlus
 } from 'lucide-react';
 
 const ApplicationReviews = () => {

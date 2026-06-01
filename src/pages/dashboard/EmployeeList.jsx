@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import api from '../../services/api';
 import {
   Users,
   Search,
-  Filter,
   Plus,
   Edit2,
   Trash2,
@@ -14,7 +13,6 @@ import {
   Loader2,
   Mail,
   Phone,
-  Briefcase,
   Calendar,
   DollarSign,
   UserCheck,
@@ -35,7 +33,7 @@ const EmployeeList = () => {
   const [selectedDept, setSelectedDept] = useState('');
   const [selectedRole, setSelectedRole] = useState('');
 
-  const fetchEmployees = async () => {
+  const fetchEmployees = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
@@ -56,7 +54,7 @@ const EmployeeList = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [search, selectedDept, selectedRole]);
 
   const fetchDepartments = async () => {
     try {
@@ -75,7 +73,7 @@ const EmployeeList = () => {
 
   useEffect(() => {
     fetchEmployees();
-  }, [search, selectedDept, selectedRole]);
+  }, [fetchEmployees]);
 
   const handleDeleteEmployee = async (id, name) => {
     if (!window.confirm(`Are you sure you want to delete employee "${name}"? This will terminate their account.`)) {

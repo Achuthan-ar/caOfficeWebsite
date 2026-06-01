@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
-import { Printer, ArrowLeft, Award, ShieldCheck, Download } from 'lucide-react';
+import { Printer, ArrowLeft, Award, ShieldCheck } from 'lucide-react';
 
 const CertificateView = () => {
   const { id } = useParams();

@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api';
 import { useAuthStore } from '../../store/authStore';
 import { 
-  FileText, Download, Printer, Plus, Search, Calendar, 
-  Award, TrendingUp, BarChart2, CheckCircle, RefreshCw, X
+  FileText, Download, Printer, Plus, Calendar, 
+  TrendingUp, BarChart2, RefreshCw, X
 } from 'lucide-react';
 
 const MonthlyReports = () => {
@@ -28,7 +28,7 @@ const MonthlyReports = () => {
   const isHR = ['Admin', 'Manager'].includes(user?.role?.name);
   const isTL = user?.role?.name === 'TL';
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -69,11 +69,11 @@ const MonthlyReports = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filterMonth, filterEmployee, isHR, isTL]);
 
   useEffect(() => {
     fetchData();
-  }, [filterMonth, filterEmployee]);
+  }, [fetchData]);
 
   const handleGenerateReport = async (e) => {
     e.preventDefault();

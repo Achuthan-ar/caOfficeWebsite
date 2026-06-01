@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { 
-  Users, User, Award, CheckCircle, FileText, Plus, Send, 
-  ExternalLink, Calendar, BookOpen, Clock, X, Star, HelpCircle, FilePlus
+  Users, Award, CheckCircle, Plus, Send, 
+  ExternalLink, Clock, X, Star, HelpCircle
 } from 'lucide-react';
 
 const MentorWorkspace = () => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../../services/api';
 import {
   Clock,
@@ -6,7 +6,6 @@ import {
   Calendar,
   AlertCircle,
   TrendingUp,
-  Percent,
   CalendarDays,
   Coffee,
   HelpCircle,

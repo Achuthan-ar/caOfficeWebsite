@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useNotificationStore } from '../store/notificationStore';
-import api from '../services/api';
+
 import {
   LayoutDashboard,
   Users,
@@ -12,7 +12,6 @@ import {
   Menu,
   X,
   ChevronDown,
-  User,
   Shield,
   Briefcase,
   FileText,

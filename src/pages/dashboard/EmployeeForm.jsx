@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useForm, useFieldArray } from 'react-hook-form';
 import api from '../../services/api';
 import {
-  Users,
   ArrowLeft,
   Loader2,
   AlertCircle,
@@ -55,7 +54,7 @@ const EmployeeForm = () => {
     name: 'documents',
   });
 
-  const fetchDepartments = async () => {
+  const fetchDepartments = useCallback(async () => {
     try {
       const response = await api.get('/departments');
       if (response.data?.success) {
@@ -64,9 +63,9 @@ const EmployeeForm = () => {
     } catch (err) {
       console.error('Error fetching departments:', err.message);
     }
-  };
+  }, []);
 
-  const fetchEmployeeDetails = async () => {
+  const fetchEmployeeDetails = useCallback(async () => {
     if (!id) return;
     setFetching(true);
     setError('');
@@ -105,7 +104,7 @@ const EmployeeForm = () => {
     } finally {
       setFetching(false);
     }
-  };
+  }, [id, setValue, remove, append]);
 
   useEffect(() => {
     const init = async () => {
@@ -115,7 +114,7 @@ const EmployeeForm = () => {
       }
     };
     init();
-  }, [id]);
+  }, [isEditMode, fetchDepartments, fetchEmployeeDetails]);
 
   const onSubmit = async (data) => {
     setLoading(true);

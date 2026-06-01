@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import api from '../../services/api';
 import { 
-  FileText, Upload, Download, CheckCircle, AlertCircle, Clock, 
-  Send, Plus, FileUp, X, Bell, Info, Landmark, Layers, ExternalLink
+  Upload, Download, CheckCircle, AlertCircle, 
+  Send, X, Info, Landmark, ExternalLink
 } from 'lucide-react';
 
 const ClientDashboard = () => {
@@ -171,7 +171,7 @@ const ClientDashboard = () => {
           {/* Stepper */}
           <div className="relative flex justify-between items-center py-2">
             {gstSteps.map((step, idx) => (
-              <React.Fragment key={idx}>
+              <Fragment key={idx}>
                 {/* Step Circle */}
                 <div
                   className={`w-6 h-6 rounded-full border text-[9px] font-black flex items-center justify-center relative z-10 select-none ${getTrackerStepClass(client.filingStatus?.gstStatus, step, gstSteps)}`}
@@ -186,7 +186,7 @@ const ClientDashboard = () => {
                 {idx < gstSteps.length - 1 && (
                   <div className={`h-1 flex-1 relative z-0 -mx-1 ${getTrackerBarClass(client.filingStatus?.gstStatus, gstSteps[idx + 1], gstSteps)}`}></div>
                 )}
-              </React.Fragment>
+              </Fragment>
             ))}
           </div>
           <div className="pt-2"></div>
@@ -202,7 +202,7 @@ const ClientDashboard = () => {
           {/* Stepper */}
           <div className="relative flex justify-between items-center py-2">
             {itrSteps.map((step, idx) => (
-              <React.Fragment key={idx}>
+              <Fragment key={idx}>
                 {/* Step Circle */}
                 <div
                   className={`w-6 h-6 rounded-full border text-[9px] font-black flex items-center justify-center relative z-10 select-none ${getTrackerStepClass(client.filingStatus?.itrStatus, step, itrSteps)}`}
@@ -217,7 +217,7 @@ const ClientDashboard = () => {
                 {idx < itrSteps.length - 1 && (
                   <div className={`h-1 flex-1 relative z-0 -mx-1 ${getTrackerBarClass(client.filingStatus?.itrStatus, itrSteps[idx + 1], itrSteps)}`}></div>
                 )}
-              </React.Fragment>
+              </Fragment>
             ))}
           </div>
           <div className="pt-2"></div>
@@ -233,7 +233,7 @@ const ClientDashboard = () => {
           {/* Stepper */}
           <div className="relative flex justify-between items-center py-2">
             {auditSteps.map((step, idx) => (
-              <React.Fragment key={idx}>
+              <Fragment key={idx}>
                 {/* Step Circle */}
                 <div
                   className={`w-6 h-6 rounded-full border text-[9px] font-black flex items-center justify-center relative z-10 select-none ${getTrackerStepClass(client.filingStatus?.auditStatus, step, auditSteps)}`}
@@ -248,7 +248,7 @@ const ClientDashboard = () => {
                 {idx < auditSteps.length - 1 && (
                   <div className={`h-1 flex-1 relative z-0 -mx-1 ${getTrackerBarClass(client.filingStatus?.auditStatus, auditSteps[idx + 1], auditSteps)}`}></div>
                 )}
-              </React.Fragment>
+              </Fragment>
             ))}
           </div>
           <div className="pt-2"></div>

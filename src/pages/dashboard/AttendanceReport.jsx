@@ -1,16 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../../services/api';
 import {
   FileText,
-  Calendar,
   AlertCircle,
-  TrendingUp,
   Download,
   Search,
-  Filter,
-  CheckCircle,
-  Clock,
-  UserCheck,
 } from 'lucide-react';
 
 const AttendanceReport = () => {
@@ -25,27 +19,27 @@ const AttendanceReport = () => {
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
 
-  const fetchReport = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const response = await api.get('/attendance/report', {
-        params: { month },
-      });
-      if (response.data?.success) {
-        setReport(response.data.data);
-      } else {
-        setError('Failed to fetch attendance report');
-      }
-    } catch (err) {
-      console.error('Error fetching report:', err.message);
-      setError(err.response?.data?.message || 'Error occurred while loading report.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchReport = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const response = await api.get('/attendance/report', {
+          params: { month },
+        });
+        if (response.data?.success) {
+          setReport(response.data.data);
+        } else {
+          setError('Failed to fetch attendance report');
+        }
+      } catch (err) {
+        console.error('Error fetching report:', err.message);
+        setError(err.response?.data?.message || 'Error occurred while loading report.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchReport();
   }, [month]);
 

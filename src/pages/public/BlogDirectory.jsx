@@ -9,6 +9,7 @@ const BlogDirectory = () => {
   const [featuredBlog, setFeaturedBlog] = useState(null);
   
   const [search, setSearch] = useState('');
+  const [searchInput, setSearchInput] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -75,6 +76,7 @@ const BlogDirectory = () => {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
+    setSearch(searchInput);
     setCurrentPage(1);
   };
 
@@ -186,8 +188,8 @@ const BlogDirectory = () => {
           <input
             type="text"
             placeholder="Search updates..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
             className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl py-2 pl-10 pr-4 text-xs text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none"
           />
         </form>

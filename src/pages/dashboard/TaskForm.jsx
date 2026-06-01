@@ -1,17 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import api from '../../services/api';
 import {
-  Briefcase,
   ArrowLeft,
   Loader2,
   AlertCircle,
   CheckCircle,
-  FileText,
-  Clock,
-  UserCheck,
-  Tag,
 } from 'lucide-react';
 
 const TaskForm = () => {
@@ -42,7 +37,7 @@ const TaskForm = () => {
     },
   });
 
-  const fetchDependencies = async () => {
+  const fetchDependencies = useCallback(async () => {
     try {
       const [empRes, deptRes] = await Promise.all([
         api.get('/employees'),
@@ -58,9 +53,9 @@ const TaskForm = () => {
     } catch (err) {
       console.error('Error fetching task dependencies:', err.message);
     }
-  };
+  }, []);
 
-  const fetchTaskDetails = async () => {
+  const fetchTaskDetails = useCallback(async () => {
     if (!id) return;
     setFetching(true);
     setError('');
@@ -85,7 +80,7 @@ const TaskForm = () => {
     } finally {
       setFetching(false);
     }
-  };
+  }, [id, setValue]);
 
   useEffect(() => {
     const init = async () => {
@@ -95,7 +90,7 @@ const TaskForm = () => {
       }
     };
     init();
-  }, [id]);
+  }, [isEditMode, fetchDependencies, fetchTaskDetails]);
 
   const onSubmit = async (data) => {
     setLoading(true);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import api from '../../services/api';
@@ -15,10 +15,8 @@ import {
   Clock,
   MessageSquare,
   Paperclip,
-  Check,
   X,
   FileText,
-  User,
   History,
   Send,
   Loader2,
@@ -30,7 +28,7 @@ const TaskKanban = () => {
   const [tasks, setTasks] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [, setError] = useState('');
   const [success, setSuccess] = useState('');
 
   // Filters
@@ -52,7 +50,7 @@ const TaskKanban = () => {
 
   const isPrivileged = ['Admin', 'Manager', 'TL'].includes(currentUser?.role?.name);
 
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
@@ -71,7 +69,7 @@ const TaskKanban = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [search, selectedDept, selectedPriority]);
 
   const fetchDepartments = async () => {
     try {
@@ -90,7 +88,7 @@ const TaskKanban = () => {
 
   useEffect(() => {
     fetchTasks();
-  }, [search, selectedDept, selectedPriority]);
+  }, [fetchTasks]);
 
   // Load comments & details when task is opened
   const handleOpenDetails = async (task) => {

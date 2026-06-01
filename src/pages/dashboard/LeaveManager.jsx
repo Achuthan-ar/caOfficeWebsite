@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuthStore } from '../../store/authStore';
 import api from '../../services/api';
@@ -6,16 +6,11 @@ import {
   Calendar,
   AlertCircle,
   CheckCircle,
-  Clock,
-  User,
   Coffee,
   Check,
   X,
-  FileText,
-  UserCheck,
   Send,
   Loader2,
-  Bookmark,
 } from 'lucide-react';
 
 const LeaveManager = () => {
@@ -49,7 +44,7 @@ const LeaveManager = () => {
 
   const isManagerOrAdmin = ['Admin', 'Manager'].includes(currentUser?.role?.name);
 
-  const fetchMyLeaves = async () => {
+  const fetchMyLeaves = useCallback(async () => {
     try {
       const response = await api.get('/leaves/my');
       if (response.data?.success) {
@@ -64,9 +59,9 @@ const LeaveManager = () => {
     } catch (err) {
       console.error('Error fetching my leaves:', err.message);
     }
-  };
+  }, []);
 
-  const fetchTeamLeaves = async () => {
+  const fetchTeamLeaves = useCallback(async () => {
     if (!isManagerOrAdmin) return;
     try {
       const response = await api.get('/leaves');
@@ -76,20 +71,20 @@ const LeaveManager = () => {
     } catch (err) {
       console.error('Error fetching team leaves:', err.message);
     }
-  };
+  }, [isManagerOrAdmin]);
 
-  const initData = async () => {
+  const initData = useCallback(async () => {
     setLoading(true);
     await fetchMyLeaves();
     if (isManagerOrAdmin) {
       await fetchTeamLeaves();
     }
     setLoading(false);
-  };
+  }, [isManagerOrAdmin, fetchMyLeaves, fetchTeamLeaves]);
 
   useEffect(() => {
     initData();
-  }, []);
+  }, [initData]);
 
   const onSubmitLeave = async (data) => {
     setError('');

@@ -1,25 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuthStore } from '../store/authStore';
 import api from '../services/api';
 import {
   Activity,
   HardDrive,
-  Users,
   Server,
   TrendingUp,
   FolderKanban,
   Clock,
   AlertCircle,
-  FileText,
-  CheckCircle,
   Clock4,
   Award,
   BookOpen,
   Bell,
   Receipt,
   RotateCw,
-  UserCheck,
-  Calendar,
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -29,7 +24,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
@@ -62,13 +57,13 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     if (user?.role?.name) {
       fetchDashboardData();
     }
-  }, [user]);
+  }, [user, fetchDashboardData]);
 
   if (loading) {
     return (
