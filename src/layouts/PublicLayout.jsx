@@ -1,27 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { Briefcase, Sun, Moon, Menu, X, ArrowRight, ShieldCheck, Mail, MapPin, Phone } from 'lucide-react';
+import { Briefcase, Menu, X, ArrowRight, ShieldCheck, Mail, MapPin, Phone } from 'lucide-react';
 
 const PublicLayout = () => {
   const { isAuthenticated } = useAuthStore();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isDark, setIsDark] = useState(() => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) return savedTheme === 'dark';
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
-  });
-
   useEffect(() => {
-    if (isDark) {
-      document.body.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.body.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [isDark]);
+    document.body.classList.remove('dark');
+    localStorage.setItem('theme', 'light');
+  }, []);
 
   const navLinks = [
     { label: 'Home', path: '/' },
@@ -70,14 +59,7 @@ const PublicLayout = () => {
           {/* Right Header Buttons */}
           <div className="hidden lg:flex items-center gap-4">
             
-            {/* Theme Toggle */}
-            <button
-              onClick={() => setIsDark(!isDark)}
-              className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors"
-              aria-label="Toggle Theme"
-            >
-              {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </button>
+
 
             {/* Portal Link */}
             <Link
@@ -91,12 +73,6 @@ const PublicLayout = () => {
 
           {/* Mobile Hamburger menu */}
           <div className="flex items-center gap-3 lg:hidden">
-            <button
-              onClick={() => setIsDark(!isDark)}
-              className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
-            >
-              {isDark ? <Sun className="h-4.5 w-4.5" /> : <Moon className="h-4.5 w-4.5" />}
-            </button>
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="rounded-lg p-2 text-slate-550 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
@@ -174,7 +150,12 @@ const PublicLayout = () => {
                 </li>
               ))}
               <li>
-                <a href="http://localhost:5000/sitemap.xml" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-500 transition-colors">
+                <a 
+                  href={`${(import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '')}/sitemap.xml`} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="hover:text-indigo-500 transition-colors"
+                >
                   XML Sitemap
                 </a>
               </li>

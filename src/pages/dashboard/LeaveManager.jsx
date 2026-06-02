@@ -161,6 +161,13 @@ const LeaveManager = () => {
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
   };
 
+  const isLeaveEnded = (endDateStr) => {
+    const today = new Date();
+    const endDate = new Date(endDateStr);
+    endDate.setHours(23, 59, 59, 999);
+    return today > endDate;
+  };
+
   const getStatusBadge = (status) => {
     switch (status) {
       case 'Approved':
@@ -317,7 +324,7 @@ const LeaveManager = () => {
                                 <span className={`inline-block rounded-md px-2 py-0.5 text-[9px] font-bold uppercase ${getStatusBadge(leave.status)}`}>
                                   {leave.status}
                                 </span>
-                                {['Pending', 'Approved'].includes(leave.status) && (
+                                {['Pending', 'Approved'].includes(leave.status) && !isLeaveEnded(leave.endDate) && (
                                   <button
                                     onClick={() => handleCancelLeave(leave._id)}
                                     disabled={isActioning}

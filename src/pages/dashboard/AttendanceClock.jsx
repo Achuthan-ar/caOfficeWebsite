@@ -105,6 +105,50 @@ const AttendanceClock = () => {
     }
   };
 
+  const handleStartBreak = async () => {
+    setActionLoading(true);
+    setMessage({ text: '', type: '' });
+    try {
+      const response = await api.post('/attendance/start-break');
+      if (response.data?.success) {
+        setMessage({
+          text: response.data.message || 'Lunch break started.',
+          type: 'success',
+        });
+        await fetchStatsAndHistory();
+      }
+    } catch (err) {
+      setMessage({
+        text: err.response?.data?.message || 'Failed to start break.',
+        type: 'error',
+      });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleEndBreak = async () => {
+    setActionLoading(true);
+    setMessage({ text: '', type: '' });
+    try {
+      const response = await api.post('/attendance/end-break');
+      if (response.data?.success) {
+        setMessage({
+          text: response.data.message || 'Lunch break ended.',
+          type: 'success',
+        });
+        await fetchStatsAndHistory();
+      }
+    } catch (err) {
+      setMessage({
+        text: err.response?.data?.message || 'Failed to end break.',
+        type: 'error',
+      });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const formatDate = (d) => {
     return d.toLocaleDateString('en-US', {
       weekday: 'long',
@@ -257,14 +301,38 @@ const AttendanceClock = () => {
                 Check In
               </button>
             ) : !checkedOut ? (
-              <button
-                disabled={actionLoading}
-                onClick={handleCheckOut}
-                className="w-full flex items-center justify-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 shadow-lg shadow-amber-500/15 transition-all duration-200 active:scale-[0.98] disabled:opacity-50 cursor-pointer text-sm"
-              >
-                <LogOut className="h-5 w-5" />
-                Check Out
-              </button>
+              stats?.today?.breakStart && !stats?.today?.breakEnd ? (
+                <button
+                  disabled={actionLoading}
+                  onClick={handleEndBreak}
+                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 shadow-lg shadow-emerald-500/15 transition-all duration-200 active:scale-[0.98] disabled:opacity-50 cursor-pointer text-sm"
+                >
+                  <Coffee className="h-5 w-5" />
+                  End Lunch Break
+                </button>
+              ) : (
+                <div className="space-y-2">
+                  <button
+                    disabled={actionLoading}
+                    onClick={handleCheckOut}
+                    className="w-full flex items-center justify-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 shadow-lg shadow-amber-500/15 transition-all duration-200 active:scale-[0.98] disabled:opacity-50 cursor-pointer text-sm"
+                  >
+                    <LogOut className="h-5 w-5" />
+                    Check Out
+                  </button>
+                  
+                  {!stats?.today?.breakStart && (
+                    <button
+                      disabled={actionLoading}
+                      onClick={handleStartBreak}
+                      className="w-full flex items-center justify-center gap-2 rounded-xl bg-indigo-500 hover:bg-indigo-650 text-white font-bold py-2.5 shadow transition active:scale-[0.98] disabled:opacity-50 cursor-pointer text-xs"
+                    >
+                      <Coffee className="h-4.5 w-4.5" />
+                      Start Lunch Break
+                    </button>
+                  )}
+                </div>
+              )
             ) : (
               <div className="w-full text-center py-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold rounded-xl text-slate-500 uppercase tracking-wide">
                 Done for today
@@ -288,6 +356,32 @@ const AttendanceClock = () => {
                       : '--:--'}
                   </span>
                 </div>
+                {stats.today.breakStart && (
+                  <div className="col-span-2 pt-2 border-t border-slate-100/50 dark:border-slate-905/30 grid grid-cols-3 gap-2">
+                    <div>
+                      <span className="text-slate-400 block mb-0.5">Break Start</span>
+                      <span className="text-slate-700 dark:text-slate-200">
+                        {new Date(stats.today.breakStart).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block mb-0.5">Break End</span>
+                      <span className="text-slate-700 dark:text-slate-200">
+                        {stats.today.breakEnd
+                          ? new Date(stats.today.breakEnd).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                          : 'Ongoing'}
+                      </span>
+                    </div>
+                    {stats.today.breakDuration > 0 && (
+                      <div className="text-right">
+                        <span className="text-slate-400 block mb-0.5">Duration</span>
+                        <span className="text-indigo-500 font-bold">
+                          {stats.today.breakDuration}m
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -342,9 +436,10 @@ const AttendanceClock = () => {
               <p className="font-bold">CA Office Attendance Rules</p>
               <ul className="list-disc list-inside space-y-1 font-semibold text-slate-500 dark:text-slate-400">
                 <li>Check-in threshold is <span className="text-indigo-500 font-bold">09:45 AM</span>. Entries later than this are flagged as <span className="text-amber-500 font-bold">Late</span>.</li>
-                <li>Check-out threshold is <span className="text-indigo-500 font-bold">06:30 PM</span>. Early checkout will register as a <span className="text-yellow-500 font-bold">Half-Day</span>.</li>
+                <li>Check-in at or after <span className="text-indigo-500 font-bold">01:30 PM</span> will register as a <span className="text-yellow-500 font-bold">Half-Day</span>.</li>
+                <li>Check-out threshold is <span className="text-indigo-500 font-bold">05:30 PM</span>. Early checkout before this registers as a <span className="text-yellow-500 font-bold">Half-Day</span>.</li>
                 <li>Net work hours must exceed <span className="text-indigo-500 font-bold">4.0 hours</span>. Otherwise, it logs as a <span className="text-yellow-500 font-bold">Half-Day</span>.</li>
-                <li>A 1-hour lunch break is automatically deducted from active work hours on check-out.</li>
+                <li>Use the <span className="text-indigo-500 font-bold">Lunch Break</span> button to log your break duration. The actual logged duration will be deducted on check-out.</li>
               </ul>
             </div>
           </div>

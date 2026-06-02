@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 
 const Login = () => {
-  const { login, register: registerClient, sendOtp, isLoading } = useAuthStore();
+  const { login, register: registerClient, sendOtp, isLoading, error: authError, clearError } = useAuthStore();
   const navigate = useNavigate();
   
   const [isRegister, setIsRegister] = useState(false);
@@ -71,6 +71,7 @@ const Login = () => {
   const onSubmit = async (data) => {
     setFormError('');
     setFormSuccess('');
+    clearError();
     
     if (isRegister) {
       // Validate Client Registration
@@ -113,15 +114,16 @@ const Login = () => {
     setFormError('');
     setFormSuccess('');
     setOtpSent(false);
+    clearError();
     reset();
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {/* Messages */}
-      {formError && (
+      {(formError || authError) && (
         <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-xs text-red-400 leading-relaxed">
-          {formError}
+          {formError || authError}
         </div>
       )}
 

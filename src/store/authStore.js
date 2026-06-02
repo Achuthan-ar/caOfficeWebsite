@@ -22,6 +22,7 @@ export const useAuthStore = create((set, get) => ({
       );
       
       const { data } = response.data;
+      sessionStorage.setItem('isSessionActive', 'true');
       set({
         user: {
           id: data._id,
@@ -51,6 +52,7 @@ export const useAuthStore = create((set, get) => ({
       );
       
       const { data } = response.data;
+      sessionStorage.setItem('isSessionActive', 'true');
       set({
         user: {
           id: data._id,
@@ -95,6 +97,7 @@ export const useAuthStore = create((set, get) => ({
   },
 
   logoutStore: () => {
+    sessionStorage.removeItem('isSessionActive');
     set({
       user: null,
       accessToken: null,
@@ -103,6 +106,8 @@ export const useAuthStore = create((set, get) => ({
       error: null,
     });
   },
+
+  clearError: () => set({ error: null }),
 
   forgotPassword: async (email) => {
     set({ isLoading: true, error: null });
@@ -151,6 +156,7 @@ export const useAuthStore = create((set, get) => ({
         });
         
         const { data } = profileResponse.data;
+        sessionStorage.setItem('isSessionActive', 'true');
         set({
           user: data,
           accessToken: token,

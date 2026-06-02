@@ -5,11 +5,20 @@ import { useAuthStore } from './store/authStore';
 import AppRoutes from './routes/AppRoutes';
 
 function App() {
-  const { checkAuth, isLoading } = useAuthStore();
+  const { checkAuth, logout, isLoading } = useAuthStore();
 
   useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
+    const initAuth = async () => {
+      const isSessionActive = sessionStorage.getItem('isSessionActive');
+      if (!isSessionActive) {
+        // Clear all persistent cookies and reset session when tab is reopened
+        await logout();
+      } else {
+        await checkAuth();
+      }
+    };
+    initAuth();
+  }, [checkAuth, logout]);
 
   if (isLoading) {
     return (

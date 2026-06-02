@@ -21,6 +21,38 @@
   --color-brand-600: #7c3aed;
   --color-brand-700: #6d28d9;
   --color-brand-900: #4c1d95;
+
+  /* Custom slate shades for premium UI consistency and readability */
+  --color-slate-150: #eef1f6;
+  --color-slate-205: #e0e6ed;
+  --color-slate-250: #d1d7e0;
+  --color-slate-330: #b8c5d6;
+  --color-slate-350: #b2becd;
+  --color-slate-450: #7e8a9c;
+  --color-slate-455: #758193;
+  --color-slate-550: #56657a;
+  --color-slate-650: #3e4b5e;
+  --color-slate-655: #3a4658;
+  --color-slate-750: #2d394a;
+  --color-slate-805: #1c2637;
+  --color-slate-850: #182232;
+  --color-slate-855: #141c2b;
+
+  /* Custom vibrant theme colors for specific status badges, borders, and dark-mode states */
+  --color-indigo-550: #5455eb;
+  --color-indigo-555: #4f46e5;
+  --color-indigo-650: #493fdf;
+
+  --color-emerald-550: #0b9f71;
+  --color-emerald-555: #0aa877;
+  --color-emerald-650: #04875e;
+
+  --color-red-550: #e53935;
+  --color-red-555: #df3535;
+
+  --color-amber-550: #e68a05;
+  --color-rose-550: #eb2c52;
+  --color-purple-550: #9e44f0;
 }
 
 /* Global Reset & Base Styling */

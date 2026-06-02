@@ -196,6 +196,14 @@ export const cancelLeave = async (req, res) => {
       return res.status(403).json({ success: false, message: 'Not authorized to cancel this request' });
     }
 
+    // Block cancellation if the leave period has already ended
+    const today = new Date();
+    const endDate = new Date(leave.endDate);
+    endDate.setHours(23, 59, 59, 999);
+    if (today > endDate) {
+      return res.status(400).json({ success: false, message: 'Cannot cancel leave request because the leave period has already ended.' });
+    }
+
     if (leave.status === 'Cancelled') {
       return res.status(400).json({ success: false, message: 'Leave request is already cancelled' });
     }

@@ -1,10 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { Shield } from 'lucide-react';
 
 const AuthLayout = () => {
   const { isAuthenticated, isLoading } = useAuthStore();
+
+  // Force dark mode on mount for the authentication pages
+  useEffect(() => {
+    document.body.classList.add('dark');
+    return () => {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme !== 'dark') {
+        document.body.classList.remove('dark');
+      }
+    };
+  }, []);
 
   // Redirect to dashboard if session is already active
   if (isAuthenticated && !isLoading) {
@@ -21,8 +32,8 @@ const AuthLayout = () => {
       <div className="absolute top-[10%] right-[15%] w-20 h-20 rounded-full bg-indigo-500/5 blur-lg animate-float"></div>
       <div className="absolute bottom-[15%] left-[10%] w-28 h-28 rounded-full bg-purple-500/5 blur-lg animate-float" style={{ animationDelay: '2s' }}></div>
 
-      {/* Auth Card Container */}
-      <div className="w-full max-w-md glass rounded-2xl shadow-2xl p-8 z-10 border border-slate-800/40 relative">
+      {/* Auth Card Container - Dark Glassmorphism with primary glow */}
+      <div className="w-full max-w-md bg-slate-900/60 border border-slate-800/80 backdrop-blur-xl rounded-2xl shadow-2xl p-8 z-10 relative glow-primary transition-all duration-300">
         <div className="flex flex-col items-center mb-6">
           <div className="w-12 h-12 bg-indigo-600/20 border border-indigo-500/30 rounded-xl flex items-center justify-center mb-3">
             <Shield className="w-6 h-6 text-indigo-400" />

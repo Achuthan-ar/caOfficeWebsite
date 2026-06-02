@@ -1,5 +1,7 @@
 import nodemailer from 'nodemailer';
 
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+
 // Helper to create a nodemailer transporter
 const getTransporter = async () => {
   // If SMTP configurations exist in .env, use them
@@ -152,7 +154,7 @@ export const sendInternCredentialsEmail = async (email, name, password) => {
     from: `"CA Office IT Support" <${process.env.FROM_EMAIL || 'admin@caoffice.com'}>`,
     to: email,
     subject: `Internship Welcome & Portal Login Credentials - CA Office`,
-    text: `Hello ${name},\n\nWelcome to your internship at CA Office! Your account has been registered.\n\nLogin credentials:\nEmail: ${email}\nPassword: ${password}\n\nPlease login at http://localhost:5173/login to access your internship tasks and reports.\n\nBest regards,\nCA Office IT Support`,
+    text: `Hello ${name},\n\nWelcome to your internship at CA Office! Your account has been registered.\n\nLogin credentials:\nEmail: ${email}\nPassword: ${password}\n\nPlease login at ${FRONTEND_URL}/login to access your internship tasks and reports.\n\nBest regards,\nCA Office IT Support`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
         <h2 style="color: #2563eb; text-align: center;">CA Office ERP</h2>
@@ -164,7 +166,7 @@ export const sendInternCredentialsEmail = async (email, name, password) => {
           <p style="margin: 0;"><strong>Temporary Password:</strong> ${password}</p>
         </div>
         <div style="text-align: center; margin: 25px 0;">
-          <a href="http://localhost:5173/login" style="background-color: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Login to Portal</a>
+          <a href="${FRONTEND_URL}/login" style="background-color: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Login to Portal</a>
         </div>
         <p style="font-size: 0.875rem; color: #6b7280; margin-top: 30px; border-top: 1px solid #eee; padding-top: 10px;">
           Best regards,<br><strong>CA Office IT Support</strong>
@@ -233,7 +235,7 @@ export const sendTaskAssignmentEmail = async (email, name, taskTitle, dueDate, c
           <p style="margin: 0; color: #ef4444;"><strong>Due Date:</strong> ${formattedDueDate}</p>
         </div>
         <div style="text-align: center; margin: 25px 0;">
-          <a href="http://localhost:5173/tasks" style="background-color: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">View Task Board</a>
+          <a href="${FRONTEND_URL}/tasks" style="background-color: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">View Task Board</a>
         </div>
         <p style="font-size: 0.875rem; color: #6b7280; margin-top: 30px; border-top: 1px solid #eee; padding-top: 10px;">
           Best regards,<br><strong>CA Office Operations Team</strong>
@@ -324,7 +326,7 @@ export const sendOneTimeRegistrationEmail = async (email, name, password, manage
     to: email,
     replyTo: managerEmail,
     subject: 'One-Time ERP Portal Registration - CA Office',
-    text: `Hello ${name},\n\nYou have been registered as a ${roleName} at CA Office by your Manager, ${managerName}.\n\nYour one-time login credentials:\nEmail: ${email}\nTemporary Password: ${password}\n\nPlease login at http://localhost:5173/login to access the portal and update your password immediately.\n\nBest regards,\nCA Office HR Operations`,
+    text: `Hello ${name},\n\nYou have been registered as a ${roleName} at CA Office by your Manager, ${managerName}.\n\nYour one-time login credentials:\nEmail: ${email}\nTemporary Password: ${password}\n\nPlease login at ${FRONTEND_URL}/login to access the portal and update your password immediately.\n\nBest regards,\nCA Office HR Operations`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
         <h2 style="color: #2563eb; text-align: center;">CA Office ERP</h2>
@@ -336,7 +338,7 @@ export const sendOneTimeRegistrationEmail = async (email, name, password, manage
           <p style="margin: 0;"><strong>One-Time Password:</strong> ${password}</p>
         </div>
         <div style="text-align: center; margin: 25px 0;">
-          <a href="http://localhost:5173/login" style="background-color: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Login to Portal</a>
+          <a href="${FRONTEND_URL}/login" style="background-color: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Login to Portal</a>
         </div>
         <p style="font-size: 0.85rem; color: #ef4444; font-weight: bold;">
           * Please change your password immediately after logging in for security.

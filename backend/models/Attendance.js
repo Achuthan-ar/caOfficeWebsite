@@ -18,6 +18,16 @@ const attendanceSchema = new mongoose.Schema(
     checkOut: {
       type: Date,
     },
+    breakStart: {
+      type: Date,
+    },
+    breakEnd: {
+      type: Date,
+    },
+    breakDuration: {
+      type: Number, // In minutes
+      default: 0,
+    },
     status: {
       type: String,
       enum: ['Present', 'Absent', 'Half-Day', 'Late'],

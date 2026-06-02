@@ -30,8 +30,12 @@ export const checkIn = async (req, res) => {
     let status = 'Present';
     let lateTime = 0;
 
+    // Check-in after 1:30 PM is marked as Half-Day
+    if (hours > 13 || (hours === 13 && minutes >= 30)) {
+      status = 'Half-Day';
+    }
     // Late threshold: 09:45 AM
-    if (hours > 9 || (hours === 9 && minutes > 45)) {
+    else if (hours > 9 || (hours === 9 && minutes > 45)) {
       status = 'Late';
       // Calculate minutes late past 9:45 AM
       lateTime = (hours - 9) * 60 + minutes - 45;
@@ -47,7 +51,11 @@ export const checkIn = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: status === 'Late' ? `Checked in successfully (Late by ${lateTime} mins)` : 'Checked in successfully.',
+      message: status === 'Half-Day' 
+        ? 'Checked in successfully (Late entry marked as Half-Day)'
+        : status === 'Late' 
+          ? `Checked in successfully (Late by ${lateTime} mins)` 
+          : 'Checked in successfully.',
       data: log,
     });
   } catch (error) {
@@ -75,11 +83,18 @@ export const checkOut = async (req, res) => {
     const now = new Date();
     log.checkOut = now;
 
+    // If break was started but not ended, end it automatically now at checkout
+    if (log.breakStart && !log.breakEnd) {
+      log.breakEnd = now;
+      const breakMs = log.breakEnd - log.breakStart;
+      log.breakDuration = Math.round(breakMs / (1000 * 60));
+    }
+
     // Calculate work hours: checkOut - checkIn
     const diffMs = log.checkOut - log.checkIn;
-    // Deduct 1 hour for lunch break (3,600,000 milliseconds)
-    const lunchBreakMs = 60 * 60 * 1000;
-    const netMs = diffMs - lunchBreakMs;
+    // Deduct actual logged break duration
+    const breakMs = log.breakDuration ? log.breakDuration * 60 * 1000 : 0;
+    const netMs = diffMs - breakMs;
 
     // Compute net work hours (minimum 0)
     const workHours = netMs > 0 ? netMs / (1000 * 60 * 60) : 0;
@@ -88,12 +103,24 @@ export const checkOut = async (req, res) => {
     const checkOutHours = now.getHours();
     const checkOutMinutes = now.getMinutes();
     
-    // Check-out threshold: 06:30 PM (18:30)
-    const isEarlyCheckOut = checkOutHours < 18 || (checkOutHours === 18 && checkOutMinutes < 30);
+    // Check-out threshold: 05:30 PM (17:30)
+    const isEarlyCheckOut = checkOutHours < 17 || (checkOutHours === 17 && checkOutMinutes < 30);
 
-    // Half-Day if workHours < 4.0 or checked out before 06:30 PM
-    if (log.workHours < 4.0 || isEarlyCheckOut) {
+    const checkInDate = new Date(log.checkIn);
+    const checkInHours = checkInDate.getHours();
+    const checkInMinutes = checkInDate.getMinutes();
+    const checkedInAfter130 = checkInHours > 13 || (checkInHours === 13 && checkInMinutes >= 30);
+
+    // Half-Day if workHours < 4.0 or checked out before 05:30 PM or checked in after 1:30 PM
+    if (log.workHours < 4.0 || isEarlyCheckOut || checkedInAfter130) {
       log.status = 'Half-Day';
+    } else {
+      // Re-evaluate check-in status (Late vs Present)
+      if (checkInHours > 9 || (checkInHours === 9 && checkInMinutes > 45)) {
+        log.status = 'Late';
+      } else {
+        log.status = 'Present';
+      }
     }
 
     await log.save();
@@ -302,6 +329,71 @@ export const getMonthlyAttendanceReport = async (req, res) => {
     });
 
     res.json({ success: true, data: report });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Start Lunch Break
+// @route   POST /api/attendance/start-break
+// @access  Private (All Employees/Staff)
+export const startBreak = async (req, res) => {
+  try {
+    const todayStr = getLocalDateString();
+    const log = await Attendance.findOne({ user: req.user._id, date: todayStr });
+    if (!log) {
+      return res.status(400).json({ success: false, message: 'You must check-in before taking a break.' });
+    }
+    if (log.checkOut) {
+      return res.status(400).json({ success: false, message: 'Already checked out for today.' });
+    }
+    if (log.breakStart) {
+      return res.status(400).json({ success: false, message: 'Lunch break already started/taken.' });
+    }
+
+    log.breakStart = new Date();
+    await log.save();
+
+    res.json({
+      success: true,
+      message: 'Lunch break started successfully.',
+      data: log,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    End Lunch Break
+// @route   POST /api/attendance/end-break
+// @access  Private (All Employees/Staff)
+export const endBreak = async (req, res) => {
+  try {
+    const todayStr = getLocalDateString();
+    const log = await Attendance.findOne({ user: req.user._id, date: todayStr });
+    if (!log) {
+      return res.status(400).json({ success: false, message: 'No attendance log found.' });
+    }
+    if (!log.breakStart) {
+      return res.status(400).json({ success: false, message: 'Lunch break has not been started.' });
+    }
+    if (log.breakEnd) {
+      return res.status(400).json({ success: false, message: 'Lunch break already ended.' });
+    }
+
+    log.breakEnd = new Date();
+    
+    // Calculate break duration in minutes
+    const diffMs = log.breakEnd - log.breakStart;
+    log.breakDuration = Math.round(diffMs / (1000 * 60)); // In minutes
+    
+    await log.save();
+
+    res.json({
+      success: true,
+      message: `Lunch break ended successfully (${log.breakDuration} mins).`,
+      data: log,
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

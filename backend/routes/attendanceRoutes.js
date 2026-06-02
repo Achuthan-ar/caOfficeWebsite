@@ -2,6 +2,8 @@ import express from 'express';
 import {
   checkIn,
   checkOut,
+  startBreak,
+  endBreak,
   getMyAttendanceStats,
   getMyAttendanceHistory,
   getTeamAttendanceToday,
@@ -15,6 +17,8 @@ const router = express.Router();
 // Clock endpoints (all logged-in staff can access their own log)
 router.post('/check-in', protect, checkIn);
 router.post('/check-out', protect, checkOut);
+router.post('/start-break', protect, startBreak);
+router.post('/end-break', protect, endBreak);
 router.get('/stats', protect, getMyAttendanceStats);
 router.get('/my-history', protect, getMyAttendanceHistory);
 
