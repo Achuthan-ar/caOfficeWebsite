@@ -11,12 +11,11 @@ import {
   Phone, 
   Building, 
   FileText, 
-  Check, 
   ShieldCheck 
 } from 'lucide-react';
 
 const Login = () => {
-  const { login, register: registerClient, sendOtp, isLoading, error } = useAuthStore();
+  const { login, register: registerClient, sendOtp, isLoading } = useAuthStore();
   const navigate = useNavigate();
   
   const [isRegister, setIsRegister] = useState(false);
@@ -32,7 +31,6 @@ const Login = () => {
     register,
     handleSubmit,
     watch,
-    setValue,
     formState: { errors },
     reset
   } = useForm();

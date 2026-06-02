@@ -9,7 +9,6 @@ import {
   CheckCircle,
   Loader2,
   Shield,
-  Clock,
   Mail,
   Plus,
   Search,
@@ -18,7 +17,6 @@ import {
   IndianRupee,
   Phone,
   Briefcase,
-  FileText,
   UserCheck,
   X,
   Key
