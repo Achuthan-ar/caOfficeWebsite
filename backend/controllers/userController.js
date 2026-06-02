@@ -124,3 +124,47 @@ export const deleteUser = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// @desc    Update user password by admin (excluding clients)
+// @route   PUT /api/users/:id/password
+// @access  Private (Admin only)
+export const updateUserPassword = async (req, res) => {
+  const { password } = req.body;
+
+  if (!password || password.length < 6) {
+    return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
+  }
+
+  try {
+    const user = await User.findById(req.params.id).populate('role');
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Exclude clients from password modifications
+    if (user.role && user.role.name === 'Client') {
+      return res.status(400).json({ success: false, message: 'Client passwords cannot be modified by the admin' });
+    }
+
+    user.password = password;
+    await user.save();
+
+    // Log Audit Event
+    await AuditLog.create({
+      user: req.user._id,
+      action: 'User Password Changed by Admin',
+      details: `Password of user "${user.name}" (${user.email}) changed by Admin`,
+      ipAddress: req.ip || 'unknown',
+      userAgent: req.headers['user-agent'] || 'unknown',
+    });
+
+    res.json({
+      success: true,
+      message: `Password for user "${user.name}" updated successfully`,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+

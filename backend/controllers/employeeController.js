@@ -74,8 +74,8 @@ export const createEmployee = async (req, res) => {
     documents,
   } = req.body;
 
-  if (!name || !email || !role || !employeeId) {
-    return res.status(400).json({ success: false, message: 'Name, email, role, and Employee ID are required' });
+  if (!name || !email || !role) {
+    return res.status(400).json({ success: false, message: 'Name, email, and role are required' });
   }
 
   try {
@@ -85,10 +85,27 @@ export const createEmployee = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Email already registered' });
     }
 
-    // Check if Employee ID already exists
-    const idExists = await User.findOne({ employeeId });
-    if (idExists) {
-      return res.status(400).json({ success: false, message: 'Employee ID already exists' });
+    // Auto-generate employeeId if not provided in the request body
+    let finalEmployeeId = employeeId;
+    if (!finalEmployeeId) {
+      const lastEmployee = await User.findOne({
+        employeeId: { $regex: /^EMP\d+$/ }
+      }).sort({ employeeId: -1 });
+
+      let nextNum = 1;
+      if (lastEmployee && lastEmployee.employeeId) {
+        const lastNum = parseInt(lastEmployee.employeeId.replace('EMP', ''), 10);
+        if (!isNaN(lastNum)) {
+          nextNum = lastNum + 1;
+        }
+      }
+      finalEmployeeId = `EMP${String(nextNum).padStart(3, '0')}`;
+    } else {
+      // Check if Employee ID already exists
+      const idExists = await User.findOne({ employeeId: finalEmployeeId });
+      if (idExists) {
+        return res.status(400).json({ success: false, message: 'Employee ID already exists' });
+      }
     }
 
     // Resolve Role ID if role name is passed
@@ -106,7 +123,7 @@ export const createEmployee = async (req, res) => {
       email,
       password: password || 'welcome123', // Default temporary password
       role: roleId,
-      employeeId,
+      employeeId: finalEmployeeId,
       phone,
       department: department || null,
       joiningDate: joiningDate || new Date(),
@@ -115,6 +132,7 @@ export const createEmployee = async (req, res) => {
       emergencyContact: emergencyContact || { name: '', phone: '' },
       documents: documents || [],
     });
+
 
     const populatedEmployee = await User.findById(employee._id)
       .select('+salary')

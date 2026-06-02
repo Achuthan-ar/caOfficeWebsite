@@ -20,7 +20,8 @@ import {
   Briefcase,
   FileText,
   UserCheck,
-  X
+  X,
+  Key
 } from 'lucide-react';
 
 const UsersList = () => {
@@ -46,6 +47,12 @@ const UsersList = () => {
   const [showStaffModal, setShowStaffModal] = useState(false);
   const [showInternModal, setShowInternModal] = useState(false);
   const [showClientModal, setShowClientModal] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [selectedUserForPassword, setSelectedUserForPassword] = useState(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSubmitting, setPasswordSubmitting] = useState(false);
 
   // Form Hooks
   const { register: regStaff, handleSubmit: submitStaff, reset: resetStaff, formState: { errors: errorsStaff } } = useForm();
@@ -119,6 +126,36 @@ const UsersList = () => {
     }
   };
 
+  const handleUpdatePassword = async (e) => {
+    e.preventDefault();
+    setPasswordError('');
+    
+    if (!newPassword || newPassword.length < 6) {
+      setPasswordError('Password must be at least 6 characters');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError('Passwords do not match');
+      return;
+    }
+
+    setPasswordSubmitting(true);
+    try {
+      const response = await api.put(`/users/${selectedUserForPassword._id}/password`, { password: newPassword });
+      if (response.data?.success) {
+        setSuccess(response.data.message || 'Password updated successfully!');
+        setShowPasswordModal(false);
+        setNewPassword('');
+        setConfirmPassword('');
+      }
+    } catch (err) {
+      setPasswordError(err.response?.data?.message || 'Failed to update user password');
+    } finally {
+      setPasswordSubmitting(false);
+    }
+  };
+
+
   const handleDeleteUser = async (userId, userType = 'User') => {
     if (!window.confirm(`Are you sure you want to delete this ${userType}? This action is irreversible.`)) {
       return;
@@ -153,7 +190,6 @@ const UsersList = () => {
         email: data.email,
         password: data.password,
         role: data.role,
-        employeeId: data.employeeId,
         department: data.department || null,
         joiningDate: data.joiningDate || new Date(),
         salary: Number(data.salary) || 0,
@@ -161,6 +197,7 @@ const UsersList = () => {
       };
       
       const response = await api.post('/employees', payload);
+
       if (response.data?.success) {
         setSuccess('Staff account created successfully & welcome credentials emailed!');
         setShowStaffModal(false);
@@ -184,7 +221,6 @@ const UsersList = () => {
         email: data.email,
         password: data.password,
         role: 'Intern',
-        employeeId: data.employeeId,
         department: data.department || null,
         joiningDate: data.joiningDate || new Date(),
         salary: Number(data.salary) || 0,
@@ -192,6 +228,7 @@ const UsersList = () => {
       };
       
       const response = await api.post('/employees', payload);
+
       if (response.data?.success) {
         setSuccess('Intern account created successfully & welcome credentials emailed!');
         setShowInternModal(false);
@@ -280,7 +317,7 @@ const UsersList = () => {
     }).format(val || 0);
   };
 
-  const roleOptions = ['Admin', 'Manager', 'TL', 'Employee'];
+  const roleOptions = ['Manager', 'TL', 'Employee'];
 
   return (
     <div className="space-y-6">
@@ -303,7 +340,7 @@ const UsersList = () => {
         {/* Dynamic creation button based on active tab */}
         {activeTab === 'staff' && (
           <button
-            onClick={() => setShowStaffModal(true)}
+            onClick={() => { setShowStaffModal(true); setError(''); setSuccess(''); }}
             className="inline-flex items-center gap-2 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 text-sm font-semibold transition shadow-lg shadow-indigo-500/15 cursor-pointer active:scale-95"
           >
             <Plus className="h-4.5 w-4.5" />
@@ -312,7 +349,7 @@ const UsersList = () => {
         )}
         {activeTab === 'intern' && (
           <button
-            onClick={() => setShowInternModal(true)}
+            onClick={() => { setShowInternModal(true); setError(''); setSuccess(''); }}
             className="inline-flex items-center gap-2 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 text-sm font-semibold transition shadow-lg shadow-indigo-500/15 cursor-pointer active:scale-95"
           >
             <Plus className="h-4.5 w-4.5" />
@@ -321,13 +358,14 @@ const UsersList = () => {
         )}
         {activeTab === 'client' && (
           <button
-            onClick={() => setShowClientModal(true)}
+            onClick={() => { setShowClientModal(true); setError(''); setSuccess(''); }}
             className="inline-flex items-center gap-2 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 text-sm font-semibold transition shadow-lg shadow-indigo-500/15 cursor-pointer active:scale-95"
           >
             <Plus className="h-4.5 w-4.5" />
             Add Client
           </button>
         )}
+
       </div>
 
       {/* Tabs Layout */}
@@ -509,22 +547,34 @@ const UsersList = () => {
 
                           {/* Actions */}
                           <td className="py-4 px-4 text-right">
-                            {isSelf ? (
-                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Protected</span>
-                            ) : (
-                              <button
-                                onClick={() => handleDeleteUser(item._id, 'Staff')}
-                                disabled={isUpdating}
-                                className="rounded-lg p-2 text-rose-500 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/25 disabled:opacity-50 cursor-pointer active:scale-[0.95] transition"
-                                title="Delete Staff Account"
-                              >
-                                {isUpdating ? (
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                  <Trash2 className="h-4 w-4" />
-                                )}
-                              </button>
-                            )}
+                            <div className="flex justify-end gap-1.5">
+                              {isSelf ? (
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Protected</span>
+                              ) : (
+                                <>
+                                  <button
+                                    onClick={() => { setSelectedUserForPassword(item); setShowPasswordModal(true); setPasswordError(''); setNewPassword(''); setConfirmPassword(''); }}
+                                    disabled={isUpdating}
+                                    className="rounded-lg p-2 text-indigo-500 hover:bg-indigo-500/10 border border-transparent hover:border-indigo-500/25 disabled:opacity-50 cursor-pointer active:scale-[0.95] transition"
+                                    title="Change Password"
+                                  >
+                                    <Key className="h-4 w-4" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteUser(item._id, 'Staff')}
+                                    disabled={isUpdating}
+                                    className="rounded-lg p-2 text-rose-500 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/25 disabled:opacity-50 cursor-pointer active:scale-[0.95] transition"
+                                    title="Delete Staff Account"
+                                  >
+                                    {isUpdating ? (
+                                      <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                      <Trash2 className="h-4 w-4" />
+                                    )}
+                                  </button>
+                                </>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       );
@@ -625,18 +675,28 @@ const UsersList = () => {
 
                           {/* Actions */}
                           <td className="py-4 px-4 text-right">
-                            <button
-                              onClick={() => handleDeleteUser(item._id, 'Intern')}
-                              disabled={isUpdating}
-                              className="rounded-lg p-2 text-rose-500 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/25 disabled:opacity-50 cursor-pointer active:scale-[0.95] transition"
-                              title="Delete Intern Account"
-                            >
-                              {isUpdating ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <Trash2 className="h-4 w-4" />
-                              )}
-                            </button>
+                            <div className="flex justify-end gap-1.5">
+                              <button
+                                onClick={() => { setSelectedUserForPassword(item); setShowPasswordModal(true); setPasswordError(''); setNewPassword(''); setConfirmPassword(''); }}
+                                disabled={isUpdating}
+                                className="rounded-lg p-2 text-indigo-500 hover:bg-indigo-500/10 border border-transparent hover:border-indigo-500/25 disabled:opacity-50 cursor-pointer active:scale-[0.95] transition"
+                                title="Change Password"
+                              >
+                                <Key className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteUser(item._id, 'Intern')}
+                                disabled={isUpdating}
+                                className="rounded-lg p-2 text-rose-500 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/25 disabled:opacity-50 cursor-pointer active:scale-[0.95] transition"
+                                title="Delete Intern Account"
+                              >
+                                {isUpdating ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-4 w-4" />
+                                )}
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       );
@@ -760,10 +820,17 @@ const UsersList = () => {
                 <Briefcase className="h-5 w-5 text-indigo-500" />
                 Register Staff Member
               </h3>
-              <button onClick={() => { setShowStaffModal(false); resetStaff(); }} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg text-slate-500">
+              <button onClick={() => { setShowStaffModal(false); setError(''); setSuccess(''); resetStaff(); }} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg text-slate-500">
                 <X className="h-5 w-5" />
               </button>
             </div>
+
+            {error && (
+              <div className="flex items-center gap-2 rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-red-400 text-xs">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
 
             <form onSubmit={submitStaff(onAddStaff)} className="grid grid-cols-2 gap-4 text-xs font-semibold">
               {/* Name */}
@@ -773,7 +840,7 @@ const UsersList = () => {
                   type="text"
                   {...regStaff('name', { required: 'Name is required' })}
                   placeholder="Employee Full Name"
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
                 {errorsStaff.name && <p className="text-red-400 text-[10px]">{errorsStaff.name.message}</p>}
               </div>
@@ -785,7 +852,7 @@ const UsersList = () => {
                   type="email"
                   {...regStaff('email', { required: 'Email is required' })}
                   placeholder="employee@company.com"
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
                 {errorsStaff.email && <p className="text-red-400 text-[10px]">{errorsStaff.email.message}</p>}
               </div>
@@ -797,7 +864,7 @@ const UsersList = () => {
                   type="text"
                   {...regStaff('password', { required: 'Password is required', minLength: 6 })}
                   defaultValue="welcome123"
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
                 {errorsStaff.password && <p className="text-red-400 text-[10px]">{errorsStaff.password.message || 'At least 6 characters'}</p>}
               </div>
@@ -807,11 +874,10 @@ const UsersList = () => {
                 <label className="text-slate-500 block">Employee ID</label>
                 <input
                   type="text"
-                  {...regStaff('employeeId', { required: 'Employee ID is required' })}
-                  placeholder="EMP006"
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  disabled
+                  value="Auto-generated"
+                  className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 text-slate-400 cursor-not-allowed focus:outline-none"
                 />
-                {errorsStaff.employeeId && <p className="text-red-400 text-[10px]">{errorsStaff.employeeId.message}</p>}
               </div>
 
               {/* Phone */}
@@ -821,7 +887,7 @@ const UsersList = () => {
                   type="tel"
                   {...regStaff('phone')}
                   placeholder="+91 99999 99999"
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
 
@@ -830,7 +896,7 @@ const UsersList = () => {
                 <label className="text-slate-500 block">Department</label>
                 <select
                   {...regStaff('department')}
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 focus:outline-none cursor-pointer"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 text-slate-800 dark:text-white focus:outline-none cursor-pointer"
                 >
                   <option value="">Unallocated</option>
                   {departments.map((dept) => (
@@ -844,12 +910,11 @@ const UsersList = () => {
                 <label className="text-slate-500 block">Staff Role</label>
                 <select
                   {...regStaff('role')}
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 focus:outline-none cursor-pointer"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 text-slate-800 dark:text-white focus:outline-none cursor-pointer"
                 >
                   <option value="Employee">Employee</option>
                   <option value="TL">Team Leader</option>
                   <option value="Manager">Manager</option>
-                  <option value="Admin">Administrator</option>
                 </select>
               </div>
 
@@ -864,7 +929,7 @@ const UsersList = () => {
                     type="number"
                     {...regStaff('salary', { required: 'Salary is required' })}
                     placeholder="45000"
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 pl-9 pr-3 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 pl-9 pr-3 text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
                   />
                 </div>
                 {errorsStaff.salary && <p className="text-red-400 text-[10px]">{errorsStaff.salary.message}</p>}
@@ -877,7 +942,7 @@ const UsersList = () => {
                   type="date"
                   {...regStaff('joiningDate')}
                   defaultValue={new Date().toISOString().split('T')[0]}
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 focus:outline-none cursor-pointer"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 text-slate-800 dark:text-white focus:outline-none cursor-pointer"
                 />
               </div>
 
@@ -885,7 +950,7 @@ const UsersList = () => {
               <div className="col-span-2 pt-4 flex justify-end gap-3 border-t border-slate-100 dark:border-slate-900">
                 <button
                   type="button"
-                  onClick={() => { setShowStaffModal(false); resetStaff(); }}
+                  onClick={() => { setShowStaffModal(false); setError(''); setSuccess(''); resetStaff(); }}
                   className="rounded-lg border border-slate-200 dark:border-slate-800 px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-900 cursor-pointer"
                 >
                   Cancel
@@ -912,10 +977,17 @@ const UsersList = () => {
                 <UserCheck className="h-5 w-5 text-indigo-500" />
                 Register Intern Apprentice
               </h3>
-              <button onClick={() => { setShowInternModal(false); resetIntern(); }} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg text-slate-500">
+              <button onClick={() => { setShowInternModal(false); setError(''); setSuccess(''); resetIntern(); }} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg text-slate-500">
                 <X className="h-5 w-5" />
               </button>
             </div>
+
+            {error && (
+              <div className="flex items-center gap-2 rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-red-400 text-xs">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
 
             <form onSubmit={submitIntern(onAddIntern)} className="grid grid-cols-2 gap-4 text-xs font-semibold">
               {/* Name */}
@@ -925,7 +997,7 @@ const UsersList = () => {
                   type="text"
                   {...regIntern('name', { required: 'Name is required' })}
                   placeholder="Intern Full Name"
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
                 {errorsIntern.name && <p className="text-red-400 text-[10px]">{errorsIntern.name.message}</p>}
               </div>
@@ -937,7 +1009,7 @@ const UsersList = () => {
                   type="email"
                   {...regIntern('email', { required: 'Email is required' })}
                   placeholder="intern@company.com"
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
                 {errorsIntern.email && <p className="text-red-400 text-[10px]">{errorsIntern.email.message}</p>}
               </div>
@@ -949,7 +1021,7 @@ const UsersList = () => {
                   type="text"
                   {...regIntern('password', { required: 'Password is required', minLength: 6 })}
                   defaultValue="welcome123"
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
                 {errorsIntern.password && <p className="text-red-400 text-[10px]">{errorsIntern.password.message || 'At least 6 characters'}</p>}
               </div>
@@ -959,11 +1031,10 @@ const UsersList = () => {
                 <label className="text-slate-500 block">Intern / Employee ID</label>
                 <input
                   type="text"
-                  {...regIntern('employeeId', { required: 'Employee ID is required' })}
-                  placeholder="EMP005"
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  disabled
+                  value="Auto-generated"
+                  className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 text-slate-400 cursor-not-allowed focus:outline-none"
                 />
-                {errorsIntern.employeeId && <p className="text-red-400 text-[10px]">{errorsIntern.employeeId.message}</p>}
               </div>
 
               {/* Phone */}
@@ -973,7 +1044,7 @@ const UsersList = () => {
                   type="tel"
                   {...regIntern('phone')}
                   placeholder="+91 99999 99999"
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
 
@@ -982,7 +1053,7 @@ const UsersList = () => {
                 <label className="text-slate-500 block">Department</label>
                 <select
                   {...regIntern('department')}
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 focus:outline-none cursor-pointer"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 text-slate-800 dark:text-white focus:outline-none cursor-pointer"
                 >
                   <option value="">Unallocated</option>
                   {departments.map((dept) => (
@@ -1002,7 +1073,7 @@ const UsersList = () => {
                     type="number"
                     {...regIntern('salary', { required: 'Stipend is required' })}
                     placeholder="15000"
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 pl-9 pr-3 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 pl-9 pr-3 text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
                   />
                 </div>
                 {errorsIntern.salary && <p className="text-red-400 text-[10px]">{errorsIntern.salary.message}</p>}
@@ -1015,7 +1086,7 @@ const UsersList = () => {
                   type="date"
                   {...regIntern('joiningDate')}
                   defaultValue={new Date().toISOString().split('T')[0]}
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 focus:outline-none cursor-pointer"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 text-slate-800 dark:text-white focus:outline-none cursor-pointer"
                 />
               </div>
 
@@ -1023,7 +1094,7 @@ const UsersList = () => {
               <div className="col-span-2 pt-4 flex justify-end gap-3 border-t border-slate-100 dark:border-slate-900">
                 <button
                   type="button"
-                  onClick={() => { setShowInternModal(false); resetIntern(); }}
+                  onClick={() => { setShowInternModal(false); setError(''); setSuccess(''); resetIntern(); }}
                   className="rounded-lg border border-slate-200 dark:border-slate-800 px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-900 cursor-pointer"
                 >
                   Cancel
@@ -1050,10 +1121,17 @@ const UsersList = () => {
                 <Building className="h-5 w-5 text-indigo-500" />
                 Spawn Client Profile & Account
               </h3>
-              <button onClick={() => { setShowClientModal(false); resetClient(); }} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg text-slate-500">
+              <button onClick={() => { setShowClientModal(false); setError(''); setSuccess(''); resetClient(); }} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg text-slate-500">
                 <X className="h-5 w-5" />
               </button>
             </div>
+
+            {error && (
+              <div className="flex items-center gap-2 rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-red-400 text-xs">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
 
             <form onSubmit={submitClient(onAddClient)} className="grid grid-cols-2 gap-4 text-xs font-semibold">
               {/* Representative Name */}
@@ -1063,7 +1141,7 @@ const UsersList = () => {
                   type="text"
                   {...regClient('name', { required: 'Name is required' })}
                   placeholder="John Representative"
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
                 {errorsClient.name && <p className="text-red-400 text-[10px]">{errorsClient.name.message}</p>}
               </div>
@@ -1075,7 +1153,7 @@ const UsersList = () => {
                   type="email"
                   {...regClient('email', { required: 'Email is required' })}
                   placeholder="client@company.com"
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
                 {errorsClient.email && <p className="text-red-400 text-[10px]">{errorsClient.email.message}</p>}
               </div>
@@ -1087,7 +1165,7 @@ const UsersList = () => {
                   type="text"
                   {...regClient('password', { required: 'Password is required', minLength: 6 })}
                   defaultValue="welcome123"
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
                 {errorsClient.password && <p className="text-red-400 text-[10px]">{errorsClient.password.message || 'At least 6 characters'}</p>}
               </div>
@@ -1099,7 +1177,7 @@ const UsersList = () => {
                   type="tel"
                   {...regClient('phone', { required: 'Phone number is required' })}
                   placeholder="+91 99999 99999"
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
                 {errorsClient.phone && <p className="text-red-400 text-[10px]">{errorsClient.phone.message}</p>}
               </div>
@@ -1111,7 +1189,7 @@ const UsersList = () => {
                   type="text"
                   {...regClient('companyName', { required: 'Company name is required' })}
                   placeholder="Apex Solutions LLP"
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
                 {errorsClient.companyName && <p className="text-red-400 text-[10px]">{errorsClient.companyName.message}</p>}
               </div>
@@ -1129,7 +1207,7 @@ const UsersList = () => {
                     }
                   })}
                   placeholder="ABCDE1234F"
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-1 focus:ring-indigo-500 uppercase"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 uppercase"
                 />
                 {errorsClient.panNumber && <p className="text-red-400 text-[10px]">{errorsClient.panNumber.message}</p>}
               </div>
@@ -1147,7 +1225,7 @@ const UsersList = () => {
                     }
                   })}
                   placeholder="27ABCDE1234F1Z0"
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-1 focus:ring-indigo-500 uppercase"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 uppercase"
                 />
                 {errorsClient.gstin && <p className="text-red-400 text-[10px]">{errorsClient.gstin.message}</p>}
               </div>
@@ -1156,7 +1234,7 @@ const UsersList = () => {
               <div className="col-span-2 pt-4 flex justify-end gap-3 border-t border-slate-100 dark:border-slate-900">
                 <button
                   type="button"
-                  onClick={() => { setShowClientModal(false); resetClient(); }}
+                  onClick={() => { setShowClientModal(false); setError(''); setSuccess(''); resetClient(); }}
                   className="rounded-lg border border-slate-200 dark:border-slate-800 px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-900 cursor-pointer"
                 >
                   Cancel
@@ -1173,9 +1251,95 @@ const UsersList = () => {
           </div>
         </div>
       )}
+      {/* ================== MODAL: RESET PASSWORD ================== */}
+      {showPasswordModal && selectedUserForPassword && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs px-4">
+          <div className="w-full max-w-md bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-2xl space-y-4 animate-scale-up">
+            <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-900 pb-3">
+              <h3 className="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                <Key className="h-5 w-5 text-indigo-500" />
+                Reset User Password
+              </h3>
+              <button 
+                onClick={() => { setShowPasswordModal(false); setSelectedUserForPassword(null); setPasswordError(''); }} 
+                className="p-1 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg text-slate-500"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-1.5">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                You are updating the login credentials for:
+              </p>
+              <div className="bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-lg p-3 text-xs">
+                <div className="font-bold text-slate-800 dark:text-white">{selectedUserForPassword.name}</div>
+                <div className="text-slate-500 dark:text-slate-400 font-semibold">{selectedUserForPassword.email}</div>
+                <div className="text-[10px] text-slate-400 mt-1 font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 px-1.5 py-0.5 rounded inline-block">
+                  {selectedUserForPassword.role?.name || 'Staff'}
+                </div>
+              </div>
+            </div>
+
+            {passwordError && (
+              <div className="flex items-center gap-2 rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-red-400 text-xs">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                <span>{passwordError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleUpdatePassword} className="space-y-4 text-xs font-semibold">
+              {/* New Password */}
+              <div className="space-y-1">
+                <label className="text-slate-500 block">New Password</label>
+                <input
+                  type="password"
+                  required
+                  placeholder="At least 6 characters"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+
+              {/* Confirm Password */}
+              <div className="space-y-1">
+                <label className="text-slate-500 block">Confirm New Password</label>
+                <input
+                  type="password"
+                  required
+                  placeholder="Re-enter new password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-4 flex justify-end gap-3 border-t border-slate-100 dark:border-slate-900">
+                <button
+                  type="button"
+                  onClick={() => { setShowPasswordModal(false); setSelectedUserForPassword(null); setPasswordError(''); }}
+                  className="rounded-lg border border-slate-200 dark:border-slate-800 px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-900 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={passwordSubmitting}
+                  className="rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white font-bold px-4 py-2 cursor-pointer disabled:opacity-50"
+                >
+                  {passwordSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Update Password'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
     </div>
   );
 };
 
 export default UsersList;
+

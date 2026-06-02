@@ -369,15 +369,44 @@ export const getClients = async (req, res) => {
       .populate('user', 'name email phone')
       .sort({ companyName: 1 });
 
+    // Automatically generate and backfill Client ID for any existing clients that don't have one (e.g. seeded data)
+    let updated = false;
+    for (const client of clients) {
+      if (!client.clientId) {
+        // Find total number of clients with a valid clientId to determine next sequential serial number
+        const clientCount = await Client.countDocuments({ clientId: { $exists: true, $ne: null } });
+        const serialNum = 101 + clientCount;
+        const now = client.createdAt || new Date();
+        const DD = String(now.getDate()).padStart(2, '0');
+        const MM = String(now.getMonth() + 1).padStart(2, '0');
+        const dateStr = `${DD}${MM}`;
+        const phone = client.user?.phone || '00';
+        const phoneClean = String(phone).replace(/\s+/g, '');
+        const lastTwo = phoneClean.slice(-2).padStart(2, '0');
+        client.clientId = `${serialNum}${dateStr}${lastTwo}`;
+        await client.save();
+        updated = true;
+      }
+    }
+
+    // Re-fetch the clients if any of their records were updated to ensure return data is complete
+    let finalClients = clients;
+    if (updated) {
+      finalClients = await Client.find(query)
+        .populate('user', 'name email phone')
+        .sort({ companyName: 1 });
+    }
+
     res.json({
       success: true,
-      count: clients.length,
-      data: clients,
+      count: finalClients.length,
+      data: finalClients,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 // Helper: Resolve Manager/Admin role IDs
 const getReviewerRoles = async () => {

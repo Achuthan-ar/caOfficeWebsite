@@ -81,13 +81,13 @@ const CertificateView = () => {
       </div>
 
       {/* Printable Certificate Page */}
-      <div className="flex items-center justify-center p-2 sm:p-6 bg-slate-50 dark:bg-slate-900 print:bg-white print:p-0">
-        <div className="w-full max-w-4xl border-16 border-indigo-900/10 dark:border-slate-850/50 p-1 sm:p-2 bg-white dark:bg-slate-950 rounded-2xl shadow-xl relative border-double border-indigo-800 dark:border-slate-800 print:border-none print:shadow-none print:max-w-full print:w-full print:rounded-none">
+      <div className="flex items-center justify-center p-2 sm:p-6 bg-slate-50 dark:bg-slate-900 print:bg-white print:p-0 print-cert-container">
+        <div className="w-full max-w-4xl border-16 border-indigo-900/10 dark:border-slate-850/50 p-1 sm:p-2 bg-white dark:bg-slate-950 rounded-2xl shadow-xl relative border-double border-indigo-800 dark:border-slate-800 print:border-none print:shadow-none print:max-w-full print:w-full print:rounded-none print-cert-card">
           {/* Inner border */}
-          <div className="border-4 border-indigo-800/15 dark:border-slate-800/40 p-8 sm:p-14 space-y-8 rounded-xl border-dashed relative print:border-indigo-800/20 print:p-12">
+          <div className="border-4 border-indigo-800/15 dark:border-slate-800/40 p-8 sm:p-14 space-y-8 rounded-xl border-dashed relative print:border-indigo-800/20 print:p-12 print-cert-inner">
             
             {/* Background watermark badge */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.02] dark:opacity-[0.01]">
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.02] dark:opacity-[0.01] print-watermark">
               <Award className="h-96 w-96 text-indigo-900" />
             </div>
 
@@ -115,7 +115,7 @@ const CertificateView = () => {
                 {internName}
               </h2>
 
-              <p className="text-xs sm:text-sm text-slate-550 dark:text-slate-400 print:text-slate-700">
+              <p className="text-xs sm:text-sm text-slate-555 dark:text-slate-400 print:text-slate-700">
                 for successfully completing their Article Assistant / Internship training program in the department of <strong className="text-slate-800 dark:text-white font-bold print:text-black">{internship?.department?.name || 'Audit & Taxation'}</strong> at <strong className="text-slate-800 dark:text-white font-bold print:text-black">{officeName}</strong>.
               </p>
 
@@ -159,6 +159,10 @@ const CertificateView = () => {
       {/* Print-specific layout CSS */}
       <style>{`
         @media print {
+          @page {
+            size: landscape;
+            margin: 0;
+          }
           /* Hide sidebar, topbar and main workspace containers */
           header, aside, .print\\:hidden, button {
             display: none !important;
@@ -170,16 +174,60 @@ const CertificateView = () => {
           body {
             background-color: white !important;
             color: black !important;
-          }
-          .mx-auto {
-            max-w: 100% !important;
-            width: 100% !important;
-            padding: 0 !important;
             margin: 0 !important;
+            padding: 0 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          html, body {
+            height: 100% !important;
+            width: 100% !important;
+            overflow: hidden !important;
+          }
+          
+          /* Centering and Landscape scaling */
+          .print-cert-container {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            height: 100vh !important;
+            width: 100vw !important;
+            padding: 2.5rem !important; /* Spacing from paper edge */
+            box-sizing: border-box !important;
+            background: white !important;
+          }
+          .print-cert-card {
+            width: 100% !important;
+            height: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+            border: 12px double #3730a3 !important; /* Force gorgeous double border */
+            border-radius: 8px !important;
+            padding: 6px !important;
+            box-sizing: border-box !important;
+            background: white !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+          }
+          .print-cert-inner {
+            border: 4px dashed rgba(55, 48, 163, 0.2) !important; /* Force dashed border */
+            padding: 2.5rem !important;
+            height: 100% !important;
+            box-sizing: border-box !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
+            position: relative !important;
+          }
+          .print-watermark {
+            opacity: 0.03 !important;
           }
         }
       `}</style>
     </div>
+
   );
 };
 

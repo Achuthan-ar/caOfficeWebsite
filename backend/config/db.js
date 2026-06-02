@@ -779,6 +779,7 @@ const seedDB = async () => {
       console.log('No client profiles found. Seeding mock Client profile...');
       clientProfile = await Client.create({
         user: clientUser._id,
+        clientId: '101020655',
         companyName: 'Apex Logistics & Freight Solutions LLP',
         panNumber: 'AAZPA1234F',
         gstin: '27AAZPA1234F1Z0',
@@ -787,6 +788,7 @@ const seedDB = async () => {
           itrStatus: 'Filed',
           auditStatus: 'In Progress'
         },
+
         pendingWorks: [
           'Provide GSTR-1 Sales Excel Sheets for May 2026',
           'Confirm Capital Purchase Assets Ledger Entries'
