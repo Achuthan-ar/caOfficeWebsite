@@ -22,7 +22,7 @@ const PublicLayout = () => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
+    <div className="min-h-screen flex flex-col bg-white dark:bg-slate-950 transition-colors duration-300">
       
       {/* Public Header */}
       <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors duration-300">

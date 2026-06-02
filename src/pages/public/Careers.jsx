@@ -241,7 +241,7 @@ const Careers = () => {
 
       {/* Online Application Modal Form Overlay */}
       {isModalOpen && selectedJob && (
-        <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-800/40 backdrop-blur-xs">
           <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 w-full max-w-xl rounded-2xl shadow-2xl p-6 relative space-y-6 max-h-[90vh] overflow-y-auto">
             {/* Header */}
             <div className="flex justify-between items-start">

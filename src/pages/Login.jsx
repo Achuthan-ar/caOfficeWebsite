@@ -138,33 +138,33 @@ const Login = () => {
         <div className="space-y-4">
           {/* Full Name */}
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+            <label className="block text-[10px] font-bold text-slate-505 uppercase tracking-wider mb-1">
               Your Full Name
             </label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                 <User className="h-4 w-4" />
               </span>
               <input
                 type="text"
                 {...register('name', { required: 'Full name is required' })}
                 placeholder="John Doe"
-                className="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl py-2 pl-10 pr-4 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-transparent transition"
+                className="w-full bg-slate-50 border border-slate-205 rounded-xl py-2 pl-10 pr-4 text-xs text-slate-800 placeholder-slate-405 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:bg-white transition"
               />
             </div>
             {errors.name && (
-              <p className="mt-1 text-[10px] text-red-400">{errors.name.message}</p>
+              <p className="mt-1 text-[10px] text-red-500">{errors.name.message}</p>
             )}
           </div>
 
           {/* Email Address with Send OTP */}
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+            <label className="block text-[10px] font-bold text-slate-505 uppercase tracking-wider mb-1">
               Email Address
             </label>
             <div className="flex gap-2">
               <div className="relative flex-grow">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                   <Mail className="h-4 w-4" />
                 </span>
                 <input
@@ -177,7 +177,7 @@ const Login = () => {
                     },
                   })}
                   placeholder="name@company.com"
-                  className="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl py-2 pl-10 pr-4 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-transparent transition"
+                  className="w-full bg-slate-50 border border-slate-205 rounded-xl py-2 pl-10 pr-4 text-xs text-slate-800 placeholder-slate-405 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:bg-white transition"
                 />
               </div>
               <button
@@ -196,18 +196,18 @@ const Login = () => {
               </button>
             </div>
             {errors.email && (
-              <p className="mt-1 text-[10px] text-red-400">{errors.email.message}</p>
+              <p className="mt-1 text-[10px] text-red-500">{errors.email.message}</p>
             )}
           </div>
 
           {/* Verification Code (OTP) */}
           {otpSent && (
             <div className="animate-slide-in">
-              <label className="block text-[10px] font-bold text-slate-450 uppercase tracking-wider mb-1">
+              <label className="block text-[10px] font-bold text-slate-505 uppercase tracking-wider mb-1">
                 Enter Verification Code (OTP)
               </label>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                   <ShieldCheck className="h-4 w-4" />
                 </span>
                 <input
@@ -215,54 +215,54 @@ const Login = () => {
                   maxLength={6}
                   {...register('otp', { required: 'Verification code is required' })}
                   placeholder="6-digit OTP"
-                  className="w-full bg-indigo-500/5 border border-indigo-500/30 rounded-xl py-2.5 pl-10 pr-4 text-sm font-bold text-center tracking-[4px] text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-transparent transition"
+                  className="w-full bg-indigo-50/30 border border-indigo-200 rounded-xl py-2.5 pl-10 pr-4 text-sm font-bold text-center tracking-[4px] text-slate-800 placeholder-slate-405 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:bg-white transition"
                 />
               </div>
               {errors.otp && (
-                <p className="mt-1 text-[10px] text-red-400">{errors.otp.message}</p>
+                <p className="mt-1 text-[10px] text-red-500">{errors.otp.message}</p>
               )}
             </div>
           )}
 
           {/* Mobile/Phone Number (Strictly Required) */}
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+            <label className="block text-[10px] font-bold text-slate-505 uppercase tracking-wider mb-1">
               Mobile / Phone Number
             </label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                 <Phone className="h-4 w-4" />
               </span>
               <input
                 type="tel"
                 {...register('phone', { required: 'Phone number is required' })}
                 placeholder="+91 99999 99999"
-                className="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl py-2 pl-10 pr-4 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-transparent transition"
+                className="w-full bg-slate-50 border border-slate-205 rounded-xl py-2 pl-10 pr-4 text-xs text-slate-800 placeholder-slate-405 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:bg-white transition"
               />
             </div>
             {errors.phone && (
-              <p className="mt-1 text-[10px] text-red-400">{errors.phone.message}</p>
+              <p className="mt-1 text-[10px] text-red-500">{errors.phone.message}</p>
             )}
           </div>
 
           {/* Company / Business Name */}
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+            <label className="block text-[10px] font-bold text-slate-505 uppercase tracking-wider mb-1">
               Business / Company Name
             </label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                 <Building className="h-4 w-4" />
               </span>
               <input
                 type="text"
                 {...register('companyName', { required: 'Business name is required' })}
                 placeholder="Apex Advisory Services LLP"
-                className="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl py-2 pl-10 pr-4 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-transparent transition"
+                className="w-full bg-slate-50 border border-slate-205 rounded-xl py-2 pl-10 pr-4 text-xs text-slate-800 placeholder-slate-405 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:bg-white transition"
               />
             </div>
             {errors.companyName && (
-              <p className="mt-1 text-[10px] text-red-400">{errors.companyName.message}</p>
+              <p className="mt-1 text-[10px] text-red-500">{errors.companyName.message}</p>
             )}
           </div>
 
@@ -270,11 +270,11 @@ const Login = () => {
           <div className="grid grid-cols-2 gap-4">
             {/* PAN Number */}
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+              <label className="block text-[10px] font-bold text-slate-505 uppercase tracking-wider mb-1">
                 PAN Number
               </label>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                   <FileText className="h-4 w-4" />
                 </span>
                 <input
@@ -287,21 +287,21 @@ const Login = () => {
                     }
                   })}
                   placeholder="ABCDE1234F"
-                  className="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl py-2 pl-10 pr-4 text-[11px] text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-transparent transition uppercase"
+                  className="w-full bg-slate-50 border border-slate-205 rounded-xl py-2 pl-10 pr-4 text-[11px] text-slate-800 placeholder-slate-405 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:bg-white transition uppercase"
                 />
               </div>
               {errors.panNumber && (
-                <p className="mt-1 text-[9px] text-red-400">{errors.panNumber.message}</p>
+                <p className="mt-1 text-[9px] text-red-500">{errors.panNumber.message}</p>
               )}
             </div>
 
             {/* GSTIN */}
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+              <label className="block text-[10px] font-bold text-slate-505 uppercase tracking-wider mb-1">
                 GSTIN Number
               </label>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                   <FileText className="h-4 w-4" />
                 </span>
                 <input
@@ -314,22 +314,22 @@ const Login = () => {
                     }
                   })}
                   placeholder="27ABCDE1234F1Z0"
-                  className="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl py-2 pl-10 pr-4 text-[11px] text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-transparent transition uppercase"
+                  className="w-full bg-slate-50 border border-slate-205 rounded-xl py-2 pl-10 pr-4 text-[11px] text-slate-800 placeholder-slate-405 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:bg-white transition uppercase"
                 />
               </div>
               {errors.gstin && (
-                <p className="mt-1 text-[9px] text-red-400">{errors.gstin.message}</p>
+                <p className="mt-1 text-[9px] text-red-500">{errors.gstin.message}</p>
               )}
             </div>
           </div>
 
           {/* Password */}
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+            <label className="block text-[10px] font-bold text-slate-505 uppercase tracking-wider mb-1">
               Create Password
             </label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                 <Lock className="h-4 w-4" />
               </span>
               <input
@@ -342,11 +342,11 @@ const Login = () => {
                   },
                 })}
                 placeholder="••••••••"
-                className="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl py-2 pl-10 pr-4 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-transparent transition"
+                className="w-full bg-slate-50 border border-slate-205 rounded-xl py-2 pl-10 pr-4 text-xs text-slate-800 placeholder-slate-405 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:bg-white transition"
               />
             </div>
             {errors.password && (
-              <p className="mt-1 text-[10px] text-red-400">{errors.password.message}</p>
+              <p className="mt-1 text-[10px] text-red-500">{errors.password.message}</p>
             )}
           </div>
         </div>
@@ -355,11 +355,11 @@ const Login = () => {
         <div className="space-y-4 animate-fade-in">
           {/* Email Input */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
               Email Address
             </label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-500">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
                 <Mail className="h-4 w-4" />
               </span>
               <input
@@ -372,29 +372,29 @@ const Login = () => {
                   },
                 })}
                 placeholder="name@company.com"
-                className="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl py-2.5 pl-11 pr-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition duration-200"
               />
             </div>
             {errors.email && (
-              <p className="mt-1 text-xs text-red-400">{errors.email.message}</p>
+              <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>
             )}
           </div>
 
           {/* Password Input */}
           <div>
             <div className="flex justify-between items-center mb-1.5">
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
                 Password
               </label>
               <Link
                 to="/forgot-password"
-                className="text-xs text-indigo-400 hover:text-indigo-300 hover:underline transition duration-150"
+                className="text-xs text-indigo-500 hover:text-indigo-605 hover:underline transition duration-150"
               >
                 Forgot Password?
               </Link>
             </div>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-500">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
                 <Lock className="h-4 w-4" />
               </span>
               <input
@@ -407,11 +407,11 @@ const Login = () => {
                   },
                 })}
                 placeholder="••••••••"
-                className="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl py-2.5 pl-11 pr-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition duration-200"
               />
             </div>
             {errors.password && (
-              <p className="mt-1 text-xs text-red-400">{errors.password.message}</p>
+              <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>
             )}
           </div>
         </div>
@@ -421,7 +421,7 @@ const Login = () => {
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white rounded-xl py-3 font-bold text-sm shadow-lg shadow-indigo-500/25 active:scale-[0.98] transition duration-200 disabled:opacity-50 disabled:pointer-events-none cursor-pointer mt-4"
+        className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-750 text-white rounded-xl py-3 font-bold text-sm shadow-lg shadow-indigo-500/20 active:scale-[0.98] transition duration-200 disabled:opacity-50 disabled:pointer-events-none cursor-pointer mt-4"
       >
         {isLoading ? (
           <>
@@ -437,12 +437,12 @@ const Login = () => {
       </button>
 
       {/* Mode Switcher */}
-      <div className="text-center pt-2 border-t border-slate-800/40 mt-4">
+      <div className="text-center pt-2 border-t border-slate-150 mt-4">
         {isRegister ? (
           <button
             type="button"
             onClick={handleToggleMode}
-            className="text-xs text-indigo-400 hover:text-indigo-300 font-bold hover:underline transition"
+            className="text-xs text-indigo-500 hover:text-indigo-605 font-bold hover:underline transition cursor-pointer"
           >
             Already have an account? Sign In Here
           </button>
@@ -450,7 +450,7 @@ const Login = () => {
           <button
             type="button"
             onClick={handleToggleMode}
-            className="text-xs text-indigo-400 hover:text-indigo-300 font-bold hover:underline transition"
+            className="text-xs text-indigo-500 hover:text-indigo-655 font-bold hover:underline transition cursor-pointer"
           >
             Are you a Client? Register Business Here
           </button>
@@ -459,8 +459,8 @@ const Login = () => {
 
       {!isRegister && (
         <div className="pt-2 text-center">
-          <p className="text-[10px] text-slate-550 leading-normal">
-            Demo emails: <code className="text-slate-450 bg-slate-850 px-1 py-0.5 rounded">admin@company.com</code>, <code className="text-slate-450 bg-slate-850 px-1 py-0.5 rounded">client@company.com</code> (pass: <code className="text-slate-450 bg-slate-850 px-1 py-0.5 rounded">password123</code>)
+          <p className="text-[10px] text-slate-500 leading-normal">
+            Demo emails: <code className="text-slate-600 bg-slate-100 px-1 py-0.5 rounded">admin@company.com</code>, <code className="text-slate-600 bg-slate-100 px-1 py-0.5 rounded">client@company.com</code> (pass: <code className="text-slate-600 bg-slate-100 px-1 py-0.5 rounded">password123</code>)
           </p>
         </div>
       )}

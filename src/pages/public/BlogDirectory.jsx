@@ -140,10 +140,10 @@ const BlogDirectory = () => {
           </div>
           
           {/* Banner Graphic placeholder */}
-          <div className="bg-gradient-to-tr from-indigo-550/20 to-purple-550/10 min-h-60 flex items-center justify-center border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-slate-850 p-8 text-center bg-slate-900 text-slate-500">
+          <div className="bg-gradient-to-tr from-indigo-50 to-purple-50/50 min-h-60 flex items-center justify-center border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-slate-850 p-8 text-center text-slate-600">
             <div className="space-y-2">
-              <span className="block font-heading text-2xl font-bold bg-gradient-to-tr from-indigo-400 to-purple-400 bg-clip-text text-transparent">CA Compliance Briefings</span>
-              <span className="text-[10px] uppercase font-semibold text-slate-400">Published by System Administrator</span>
+              <span className="block font-heading text-2xl font-bold bg-gradient-to-tr from-indigo-600 to-purple-600 bg-clip-text text-transparent">CA Compliance Briefings</span>
+              <span className="text-[10px] uppercase font-bold text-slate-450 tracking-wider">Published by System Administrator</span>
             </div>
           </div>
         </section>

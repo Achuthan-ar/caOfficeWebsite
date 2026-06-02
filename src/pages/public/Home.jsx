@@ -56,24 +56,24 @@ const Home = () => {
     <div className="space-y-20 pb-20">
       
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-slate-950 text-white py-20 lg:py-32 px-6">
+      <section className="relative overflow-hidden bg-indigo-50/35 text-slate-800 border-b border-slate-200/60 py-20 lg:py-32 px-6">
         {/* Glow Spheres */}
-        <div className="absolute top-[-30%] left-[-20%] w-[70%] h-[70%] rounded-full bg-indigo-500/10 blur-[130px] animate-pulse-glow"></div>
-        <div className="absolute bottom-[-30%] right-[-20%] w-[70%] h-[70%] rounded-full bg-purple-500/10 blur-[130px] animate-pulse-glow" style={{ animationDelay: '4s' }}></div>
+        <div className="absolute top-[-30%] left-[-20%] w-[70%] h-[70%] rounded-full bg-indigo-500/5 blur-[130px] animate-pulse-glow"></div>
+        <div className="absolute bottom-[-30%] right-[-20%] w-[70%] h-[70%] rounded-full bg-purple-500/5 blur-[130px] animate-pulse-glow" style={{ animationDelay: '4s' }}></div>
 
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
           <div className="space-y-6">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-3 py-1 text-xs font-semibold">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100 px-3 py-1 text-xs font-semibold">
               <ShieldCheck className="h-4.5 w-4.5" />
               Trusted Accounting & Tax Advisors
             </span>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black font-heading tracking-tight leading-[1.1] text-white">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black font-heading tracking-tight leading-[1.1] text-slate-850">
               Securing Your Assets. <br />
-              <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                 Optimizing Your Wealth.
               </span>
             </h1>
-            <p className="text-sm sm:text-base text-slate-350 max-w-xl leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-600 max-w-xl leading-relaxed">
               We provide statutory audits, dynamic GST filing, direct tax strategies, and company incorporation. Streamlined compliances managed via our secure cloud portal.
             </p>
             <div className="flex flex-wrap gap-4 pt-2">
@@ -86,7 +86,7 @@ const Home = () => {
               </Link>
               <Link
                 to="/services"
-                className="bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-slate-800 rounded-xl px-6 py-3.5 text-sm font-semibold active:scale-[0.98] transition-all"
+                className="bg-white hover:bg-slate-100 text-slate-750 border border-slate-200 shadow-xs rounded-xl px-6 py-3.5 text-sm font-semibold active:scale-[0.98] transition-all"
               >
                 Explore Services
               </Link>
@@ -95,22 +95,22 @@ const Home = () => {
 
           <div className="relative flex justify-center">
             {/* Visual Frame */}
-            <div className="w-full max-w-lg aspect-[4/3] rounded-2xl bg-gradient-to-tr from-indigo-500/20 to-purple-500/10 border border-slate-800 shadow-2xl overflow-hidden p-6 glass flex flex-col justify-between">
-              <div className="flex justify-between items-center border-b border-slate-800/80 pb-3">
-                <span className="text-xs font-semibold text-indigo-400 uppercase tracking-widest">Office Statistics</span>
-                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <div className="w-full max-w-lg aspect-[4/3] rounded-2xl bg-gradient-to-tr from-white to-slate-50 border border-slate-205 shadow-xl overflow-hidden p-6 glass flex flex-col justify-between">
+              <div className="flex justify-between items-center border-b border-slate-150 pb-3">
+                <span className="text-xs font-semibold text-indigo-650 uppercase tracking-widest">Office Statistics</span>
+                <span className="h-2 w-2 rounded-full bg-emerald-555 animate-pulse"></span>
               </div>
               <div className="grid grid-cols-2 gap-4 my-auto">
-                <div className="bg-slate-900/60 p-4 rounded-xl border border-slate-800">
-                  <p className="text-2xl font-black text-white font-heading">500+</p>
-                  <p className="text-[10px] text-slate-400 font-semibold uppercase mt-0.5">Corporate Clients</p>
+                <div className="bg-white p-4 rounded-xl border border-slate-205 shadow-xs">
+                  <p className="text-2xl font-black text-slate-805 font-heading">500+</p>
+                  <p className="text-[10px] text-slate-550 font-semibold uppercase mt-0.5">Corporate Clients</p>
                 </div>
-                <div className="bg-slate-900/60 p-4 rounded-xl border border-slate-800">
-                  <p className="text-2xl font-black text-white font-heading">99.8%</p>
-                  <p className="text-[10px] text-slate-400 font-semibold uppercase mt-0.5">Filing Accuracy</p>
+                <div className="bg-white p-4 rounded-xl border border-slate-205 shadow-xs">
+                  <p className="text-2xl font-black text-slate-805 font-heading">99.8%</p>
+                  <p className="text-[10px] text-slate-550 font-semibold uppercase mt-0.5">Filing Accuracy</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-[10px] text-slate-400 border-t border-slate-800/80 pt-3">
+              <div className="flex items-center gap-2 text-[10px] text-slate-550 border-t border-slate-150 pt-3">
                 <span>ICAI Member Firm Code: CA-50029X</span>
               </div>
             </div>
@@ -164,55 +164,55 @@ const Home = () => {
       </section>
 
       {/* Why Choose Us Section */}
-      <section className="bg-slate-900 text-white py-16 px-6">
+      <section className="bg-slate-550/5 text-slate-800 border-y border-slate-200/55 py-16 px-6">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
-            <h2 className="text-3xl font-extrabold font-heading tracking-tight text-white">
+            <h2 className="text-3xl font-extrabold font-heading tracking-tight text-slate-850">
               Why Partner With Us?
             </h2>
-            <p className="text-xs text-slate-400 leading-relaxed">
+            <p className="text-xs text-slate-600 leading-relaxed">
               We leverage cloud accounting software, direct API integration to compliance portals, and a seasoned team of qualified CAs to guarantee accurate, timely, and secure filings.
             </p>
             <div className="space-y-4">
               <div className="flex gap-3">
-                <div className="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 p-1.5 rounded-lg shrink-0 h-fit">
+                <div className="bg-indigo-50 text-indigo-600 border border-indigo-100 p-1.5 rounded-lg shrink-0 h-fit">
                   <CheckCircle className="h-4 w-4" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-white">Secure Portal Infrastructure</h4>
-                  <p className="text-xs text-slate-400 mt-1">Review ledger audits and download GSTR filings 24/7 inside your client dashboard.</p>
+                  <h4 className="text-sm font-bold text-slate-800">Secure Portal Infrastructure</h4>
+                  <p className="text-xs text-slate-600 mt-1">Review ledger audits and download GSTR filings 24/7 inside your client dashboard.</p>
                 </div>
               </div>
               <div className="flex gap-3">
-                <div className="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 p-1.5 rounded-lg shrink-0 h-fit">
+                <div className="bg-indigo-50 text-indigo-600 border border-indigo-100 p-1.5 rounded-lg shrink-0 h-fit">
                   <CheckCircle className="h-4 w-4" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-white">Zero Delayed Compliance Penalties</h4>
-                  <p className="text-xs text-slate-400 mt-1">Automated reminders and prompt workflows ensure taxes are processed before deadlines.</p>
+                  <h4 className="text-sm font-bold text-slate-800">Zero Delayed Compliance Penalties</h4>
+                  <p className="text-xs text-slate-600 mt-1">Automated reminders and prompt workflows ensure taxes are processed before deadlines.</p>
                 </div>
               </div>
             </div>
           </div>
-          <div className="bg-slate-950 border border-slate-800 p-8 rounded-2xl shadow-xl space-y-6">
-            <h3 className="text-lg font-bold font-heading text-white">Need Consultation?</h3>
-            <p className="text-xs text-slate-400">Leave your details and a compliance auditor will contact you in under 2 hours.</p>
+          <div className="bg-white border border-slate-205 p-8 rounded-2xl shadow-lg space-y-6">
+            <h3 className="text-lg font-bold font-heading text-slate-850">Need Consultation?</h3>
+            <p className="text-xs text-slate-500">Leave your details and a compliance auditor will contact you in under 2 hours.</p>
             <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); alert('Consultation requested! Our team will contact you shortly.'); }}>
               <input
                 required
                 type="text"
                 placeholder="Full Name"
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl py-2 px-4 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-xs text-slate-750 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:bg-white"
               />
               <input
                 required
                 type="email"
                 placeholder="Business Email"
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl py-2 px-4 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-xs text-slate-750 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:bg-white"
               />
               <button
                 type="submit"
-                className="w-full bg-indigo-500 text-white rounded-xl py-2 px-4 text-xs font-bold hover:bg-indigo-600 transition-colors"
+                className="w-full bg-indigo-500 text-white rounded-xl py-2.5 px-4 text-xs font-bold hover:bg-indigo-600 transition-colors shadow-md shadow-indigo-500/10 active:scale-[0.98] transition-all cursor-pointer"
               >
                 Send Request
               </button>
