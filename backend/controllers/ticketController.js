@@ -227,27 +227,30 @@ export const updateTicketStatus = async (req, res) => {
     }
 
     if (assignedToId) {
-      const staff = await User.findById(assignedToId);
-      if (!staff) {
-        return res.status(404).json({ success: false, message: 'Assignee staff user not found' });
+      const currentAssignee = ticket.assignedTo?._id?.toString() || ticket.assignedTo?.toString() || '';
+      if (assignedToId !== currentAssignee) {
+        const staff = await User.findById(assignedToId);
+        if (!staff) {
+          return res.status(404).json({ success: false, message: 'Assignee staff user not found' });
+        }
+
+        ticket.assignedTo = assignedToId;
+        ticket.status = 'Assigned';
+        ticket.activityTimeline.push({
+          action: `Ticket assigned to ${staff.name} by ${req.user.name}`,
+          performedBy: req.user._id,
+        });
+
+        // Notify staff assignee
+        await sendNotification({
+          recipient: assignedToId,
+          sender: req.user._id,
+          title: 'New Support Ticket Assigned',
+          message: `You have been assigned support ticket: ${ticket.ticketNumber} ("${ticket.title}").`,
+          type: 'Ticket',
+          link: '/applications',
+        });
       }
-
-      ticket.assignedTo = assignedToId;
-      ticket.status = 'Assigned';
-      ticket.activityTimeline.push({
-        action: `Ticket assigned to ${staff.name} by ${req.user.name}`,
-        performedBy: req.user._id,
-      });
-
-      // Notify staff assignee
-      await sendNotification({
-        recipient: assignedToId,
-        sender: req.user._id,
-        title: 'New Support Ticket Assigned',
-        message: `You have been assigned support ticket: ${ticket.ticketNumber} ("${ticket.title}").`,
-        type: 'Ticket',
-        link: '/applications',
-      });
     }
 
     await ticket.save();

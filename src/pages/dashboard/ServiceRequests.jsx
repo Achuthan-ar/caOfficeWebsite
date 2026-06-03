@@ -98,6 +98,8 @@ const ServiceRequests = () => {
         
         if (hasChanged) {
           setSelectedTicket(updated);
+          setEditStatus(updated.status);
+          setEditAssignee(updated.assignedTo?._id || '');
         }
       }
     }
@@ -165,7 +167,8 @@ const ServiceRequests = () => {
     setUpdatingTicket(true);
     try {
       const payload = { status: editStatus };
-      if (canAssignSpecialist) {
+      const currentAssigneeId = selectedTicket.assignedTo?._id || '';
+      if (canAssignSpecialist && editAssignee !== currentAssigneeId) {
         payload.assignedToId = editAssignee || undefined;
       }
       const response = await api.put(`/tickets/${selectedTicket._id}`, payload);
