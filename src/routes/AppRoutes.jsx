@@ -6,18 +6,11 @@ import DashboardLayout from '../layouts/DashboardLayout';
 import ProtectedRoute from './ProtectedRoute';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { useAuthStore } from '../store/authStore';
+import Loader from '../components/Loader';
 
 // Premium glassmorphic dynamic loader spinner for page transitions
 const PageLoader = () => (
-  <div className="min-h-[60vh] flex flex-col items-center justify-center py-12">
-    <div className="relative w-12 h-12">
-      <div className="absolute inset-0 rounded-full border-4 border-indigo-100 dark:border-slate-800"></div>
-      <div className="absolute inset-0 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div>
-    </div>
-    <p className="mt-4 text-[10px] font-heading font-black text-slate-500 dark:text-slate-400 tracking-wider uppercase animate-pulse">
-      Securing content view...
-    </p>
-  </div>
+  <Loader text="Securing content view..." overlay />
 );
 
 // Dynamic Lazy Loading Imports for Code Splitting Optimization
@@ -46,7 +39,6 @@ const AttendanceClock = lazy(() => import('../pages/dashboard/AttendanceClock'))
 const AttendanceReport = lazy(() => import('../pages/dashboard/AttendanceReport'));
 
 const LeaveManager = lazy(() => import('../pages/dashboard/LeaveManager'));
-const TaskKanban = lazy(() => import('../pages/dashboard/TaskKanban'));
 const TaskTracker = lazy(() => import('../pages/dashboard/TaskTracker'));
 const TaskForm = lazy(() => import('../pages/dashboard/TaskForm'));
 
@@ -137,8 +129,8 @@ const AppRoutes = () => {
                 <Route path="/task-form/:id" element={<TaskForm />} />
               </Route>
 
-              {/* Mentor Workspace & Performance Reports - Admin, Manager, TL, and Employee only */}
-              <Route element={<ProtectedRoute allowedRoles={['Admin', 'Manager', 'TL', 'Employee']} />}>
+              {/* Mentor Workspace & Performance Reports - Manager, TL, and Employee only */}
+              <Route element={<ProtectedRoute allowedRoles={['Manager', 'TL', 'Employee']} />}>
                 <Route path="/mentor-workspace" element={<MentorWorkspace />} />
                 <Route path="/monthly-reports" element={<MonthlyReports />} />
               </Route>

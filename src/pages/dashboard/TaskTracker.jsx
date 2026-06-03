@@ -7,21 +7,16 @@ import {
   Kanban,
   Calendar,
   Plus,
-  Clock,
   User,
   AlertCircle,
-  TrendingUp,
   Search,
-  Filter,
-  CheckCircle,
-  ChevronsUpDown,
+  X,
 } from 'lucide-react';
 
 const TaskTracker = () => {
   const { user } = useAuthStore();
   const navigate = useNavigate();
-  const isClient = user?.role?.name === 'Client';
-  const canModify = ['Admin', 'Manager', 'TL'].includes(user?.role?.name);
+  const canModify = ['Manager', 'TL'].includes(user?.role?.name);
 
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -119,6 +114,13 @@ const TaskTracker = () => {
           </button>
         )}
       </div>
+
+      {error && (
+        <div className="flex items-center gap-3 p-4 rounded-xl border border-rose-500/20 bg-rose-500/[0.02] text-rose-500 text-xs">
+          <AlertCircle className="h-5 w-5 shrink-0" />
+          <p>{error}</p>
+        </div>
+      )}
 
       {/* Tabs Menu */}
       <div className="flex border-b border-slate-200 dark:border-slate-800">
@@ -222,7 +224,9 @@ const TaskTracker = () => {
                         <div
                           key={task._id}
                           onClick={() => {
-                            if (!isClient) {
+                            const isAssignee = task.assignedTo?._id === user?.id || task.assignedTo?._id === user?._id;
+                            const isManagerOrTL = ['Manager', 'TL'].includes(user?.role?.name);
+                            if (isManagerOrTL || isAssignee) {
                               setEditingTask(task);
                               setEditStatus(task.status);
                               setEditProgress(task.progress || 0);
@@ -290,7 +294,9 @@ const TaskTracker = () => {
                         <tr
                           key={task._id}
                           onClick={() => {
-                            if (!isClient) {
+                            const isAssignee = task.assignedTo?._id === user?.id || task.assignedTo?._id === user?._id;
+                            const isManagerOrTL = ['Manager', 'TL'].includes(user?.role?.name);
+                            if (isManagerOrTL || isAssignee) {
                               setEditingTask(task);
                               setEditStatus(task.status);
                               setEditProgress(task.progress || 0);

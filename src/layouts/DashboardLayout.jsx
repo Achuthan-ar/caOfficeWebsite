@@ -111,6 +111,12 @@ const DashboardLayout = () => {
 
   const navLinks = [
     {
+      title: 'Attendance Tracker',
+      path: '/attendance',
+      icon: Clock,
+      roles: ['Admin', 'Manager', 'TL', 'Employee', 'Intern'],
+    },
+    {
       title: 'Dashboard',
       path: '/dashboard',
       icon: LayoutDashboard,
@@ -163,12 +169,6 @@ const DashboardLayout = () => {
       path: '/reports-analytics',
       icon: BarChart2,
       roles: ['Admin', 'Manager', 'TL'],
-    },
-    {
-      title: 'Attendance Tracker',
-      path: '/attendance',
-      icon: Clock,
-      roles: ['Admin', 'Manager', 'TL', 'Employee', 'Intern'],
     },
     {
       title: 'Leave Request',

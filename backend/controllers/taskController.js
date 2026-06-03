@@ -175,7 +175,8 @@ export const updateTask = async (req, res) => {
 
     // Verify role permissions:
     // Employees & Interns can ONLY edit: status, progress, attachments, comments on tasks assigned to them.
-    const isSpecialPrivilege = isManagerOrAdmin(roleName) || (roleName === 'TL' && task.department?.toString() === req.user.department?.toString());
+    // Managers & Department TLs can edit details. Admin has no task privileges.
+    const isSpecialPrivilege = roleName === 'Manager' || (roleName === 'TL' && task.department?.toString() === req.user.department?.toString());
     const isAssignee = task.assignedTo?.toString() === req.user._id.toString();
 
     if (!isSpecialPrivilege && !isAssignee) {

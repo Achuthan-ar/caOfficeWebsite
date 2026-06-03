@@ -13,10 +13,11 @@ export const getEmployees = async (req, res) => {
   try {
     const query = {};
 
-    // Filter out Clients from the Employee list
-    const clientRole = await Role.findOne({ name: 'Client' });
-    if (clientRole) {
-      query.role = { $ne: clientRole._id };
+    // Filter out Clients and Admins from the Employee list
+    const excludedRoles = await Role.find({ name: { $in: ['Client', 'Admin'] } });
+    const excludedIds = excludedRoles.map((r) => r._id);
+    if (excludedIds.length > 0) {
+      query.role = { $nin: excludedIds };
     }
 
     // Apply Search (matches name, email, or employeeId)

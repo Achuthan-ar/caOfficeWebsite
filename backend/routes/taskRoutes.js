@@ -13,8 +13,8 @@ import { validateSchema, taskSchema } from '../middleware/validationMiddleware.j
 
 const router = express.Router();
 
-router.post('/', protect, authorize('Admin', 'Manager', 'TL'), validateSchema(taskSchema), createTask);
-router.post('/remind-pending', protect, authorize('Admin', 'Manager', 'TL'), remindPendingTasks);
+router.post('/', protect, authorize('Manager', 'TL'), validateSchema(taskSchema), createTask);
+router.post('/remind-pending', protect, authorize('Manager', 'TL'), remindPendingTasks);
 router.get('/', protect, getTasks);
 router.put('/:id', protect, updateTask);
 router.delete('/:id', protect, authorize('Admin', 'Manager'), deleteTask);

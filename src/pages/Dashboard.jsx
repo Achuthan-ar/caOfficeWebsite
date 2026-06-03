@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { useNotificationStore } from '../store/notificationStore';
 import api from '../services/api';
 import {
   Activity,
@@ -21,6 +22,7 @@ import {
 
 const Dashboard = () => {
   const { user } = useAuthStore();
+  const { socket } = useNotificationStore();
   const [dashboardData, setDashboardData] = useState(null);
   const [attendanceData, setAttendanceData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -66,6 +68,28 @@ const Dashboard = () => {
       fetchDashboardData();
     }
   }, [user, fetchDashboardData]);
+
+  // Real-time synchronization: refresh dashboard data silently on ticket events
+  useEffect(() => {
+    if (socket) {
+      const handleTicketChange = () => {
+        // Silently fetch fresh data
+        fetchDashboardData();
+      };
+
+      socket.on('ticketCreated', handleTicketChange);
+      socket.on('ticketAssigned', handleTicketChange);
+      socket.on('ticketUpdated', handleTicketChange);
+      socket.on('ticketClosed', handleTicketChange);
+
+      return () => {
+        socket.off('ticketCreated', handleTicketChange);
+        socket.off('ticketAssigned', handleTicketChange);
+        socket.off('ticketUpdated', handleTicketChange);
+        socket.off('ticketClosed', handleTicketChange);
+      };
+    }
+  }, [socket, fetchDashboardData]);
 
   if (loading) {
     return (

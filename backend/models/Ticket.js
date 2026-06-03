@@ -56,6 +56,16 @@ const ticketSchema = new mongoose.Schema(
           type: String,
           required: true,
         },
+        read: {
+          type: Boolean,
+          default: false,
+        },
+        attachments: [
+          {
+            name: String,
+            fileUrl: String,
+          },
+        ],
         timestamp: {
           type: Date,
           default: Date.now,

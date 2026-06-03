@@ -4,6 +4,13 @@ import User from '../models/User.js';
 import Role from '../models/Role.js';
 import { sendNotification } from '../utils/notification.js';
 import AuditLog from '../models/AuditLog.js';
+import {
+  emitTicketCreated,
+  emitTicketAssigned,
+  emitTicketUpdated,
+  emitTicketClosed,
+  emitNewMessage
+} from '../services/socketService.js';
 
 // Helper to generate Ticket ID
 const generateTicketNumber = async () => {
@@ -70,6 +77,9 @@ export const createTicket = async (req, res) => {
       ipAddress: req.ip || 'unknown',
       userAgent: req.headers['user-agent'] || 'unknown',
     });
+
+    // Real-time Socket.IO emission
+    emitTicketCreated(ticket);
 
     res.status(201).json({ success: true, data: ticket });
   } catch (error) {
@@ -145,6 +155,7 @@ export const addComment = async (req, res) => {
       userName: req.user.name,
       role: req.user.role.name,
       comment,
+      attachments: attachments || [],
       timestamp: new Date(),
     });
 
@@ -184,6 +195,20 @@ export const addComment = async (req, res) => {
         link: '/client-dashboard',
       });
     }
+    // Real-time Socket.IO emission
+    const newComment = ticket.comments[ticket.comments.length - 1];
+    const recipientId = req.user.role.name === 'Client'
+      ? (ticket.assignedTo?._id?.toString() || ticket.assignedTo?.toString())
+      : (ticket.client?.user?._id?.toString() || ticket.client?.user?.toString());
+      
+    if (recipientId) {
+      emitNewMessage(ticket._id, newComment, recipientId);
+    }
+    
+    // Also update ticket list for everyone involved
+    const clientId = ticket.client?.user?._id?.toString() || ticket.client?.user?.toString();
+    const assignedId = ticket.assignedTo?._id?.toString() || ticket.assignedTo?.toString();
+    emitTicketUpdated(ticket, assignedId, clientId);
 
     res.json({ success: true, message: 'Comment added successfully.', data: ticket });
   } catch (error) {
@@ -264,14 +289,26 @@ export const updateTicketStatus = async (req, res) => {
       userAgent: req.headers['user-agent'] || 'unknown',
     });
 
+    // Real-time Socket.IO emissions
+    const clientId = ticket.client?.user?._id?.toString() || ticket.client?.user?.toString();
+    const assignedId = ticket.assignedTo?._id?.toString() || ticket.assignedTo?.toString();
+    if (status === 'Closed') {
+      emitTicketClosed(ticket, assignedId, clientId);
+    } else {
+      if (assignedToId) {
+        emitTicketAssigned(ticket, assignedId);
+      }
+      emitTicketUpdated(ticket, assignedId, clientId);
+    }
+
     res.json({ success: true, message: 'Ticket updated successfully.', data: ticket });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// Helper: Resolve Admin and Manager roles for routing alerts
+// Helper: Resolve Admin, Manager, and TL roles for routing alerts
 const getReviewerRoles = async () => {
-  const roles = await Role.find({ name: { $in: ['Admin', 'Manager'] } });
+  const roles = await Role.find({ name: { $in: ['Admin', 'Manager', 'TL'] } });
   return roles.map(r => r._id);
 };

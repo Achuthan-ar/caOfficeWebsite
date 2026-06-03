@@ -26,6 +26,7 @@ export const useAuthStore = create((set, get) => ({
       set({
         user: {
           id: data._id,
+          _id: data._id,
           name: data.name,
           email: data.email,
           role: data.role,
@@ -56,6 +57,7 @@ export const useAuthStore = create((set, get) => ({
       set({
         user: {
           id: data._id,
+          _id: data._id,
           name: data.name,
           email: data.email,
           role: data.role,
@@ -158,7 +160,13 @@ export const useAuthStore = create((set, get) => ({
         const { data } = profileResponse.data;
         sessionStorage.setItem('isSessionActive', 'true');
         set({
-          user: data,
+          user: {
+            id: data._id,
+            _id: data._id,
+            name: data.name,
+            email: data.email,
+            role: data.role,
+          },
           accessToken: token,
           isAuthenticated: true,
           isLoading: false,

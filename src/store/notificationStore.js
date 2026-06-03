@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { io } from 'socket.io-client';
 import api from '../services/api';
 import { useAuthStore } from './authStore';
 
@@ -7,7 +8,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 export const useNotificationStore = create((set, get) => ({
   notifications: [],
   unreadCount: 0,
-  eventSource: null,
+  socket: null,
 
   fetchNotifications: async () => {
     try {
@@ -57,60 +58,54 @@ export const useNotificationStore = create((set, get) => ({
   },
 
   connectStream: (onNewNotification) => {
-    // Prevent duplicate stream connections
-    if (get().eventSource) return;
+    // Prevent duplicate socket connections
+    if (get().socket) return;
 
     const token = useAuthStore.getState().accessToken;
     if (!token) return;
 
-    // Set up EventSource connection using query parameter token authentication
-    const streamUrl = `${API_URL}/notifications/stream?token=${encodeURIComponent(token)}`;
-    const es = new EventSource(streamUrl);
+    const SOCKET_URL = API_URL.replace('/api', '');
+    const socket = io(SOCKET_URL, {
+      auth: {
+        token: token,
+      },
+      transports: ['websocket'],
+    });
 
-    es.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === 'ping' || data.type === 'connected') {
-          return; // Ignore keep-alive heartbeats
-        }
+    socket.on('connect', () => {
+      console.log('Socket.IO connection established successfully.');
+    });
 
-        // Prepend new notification to the active list
-        const updatedList = [data, ...get().notifications];
-        set({
-          notifications: updatedList,
-          unreadCount: updatedList.filter((n) => !n.isRead).length,
-        });
+    socket.on('connect_error', (err) => {
+      console.error('Socket.IO connection error:', err.message);
+    });
 
-        // Trigger visual toast banner alert if callback is provided
-        if (onNewNotification) {
-          onNewNotification(data);
-        }
-      } catch (err) {
-        console.error('Failed to parse incoming SSE message:', err.message);
+    socket.on('notificationCreated', (notification) => {
+      // Prepend new notification to the active list
+      const updatedList = [notification, ...get().notifications];
+      set({
+        notifications: updatedList,
+        unreadCount: updatedList.filter((n) => !n.isRead).length,
+      });
+
+      // Trigger visual toast banner alert if callback is provided
+      if (onNewNotification) {
+        onNewNotification(notification);
       }
-    };
+    });
 
-    es.onerror = (err) => {
-      console.error('SSE Stream Error encountered, closing stream:', err);
-      es.close();
-      set({ eventSource: null });
-      // Retry stream connection after 5 seconds
-      setTimeout(() => {
-        const isAuthenticated = useAuthStore.getState().isAuthenticated;
-        if (isAuthenticated) {
-          get().connectStream(onNewNotification);
-        }
-      }, 5000);
-    };
+    socket.on('disconnect', (reason) => {
+      console.log('Socket.IO connection disconnected:', reason);
+    });
 
-    set({ eventSource: es });
+    set({ socket });
   },
 
   disconnectStream: () => {
-    const es = get().eventSource;
-    if (es) {
-      es.close();
-      set({ eventSource: null });
+    const socket = get().socket;
+    if (socket) {
+      socket.disconnect();
+      set({ socket: null });
     }
   },
 }));

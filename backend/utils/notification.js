@@ -1,4 +1,5 @@
 import Notification from '../models/Notification.js';
+import { emitNotificationCreated } from '../services/socketService.js';
 
 // Global memory list of active SSE streams
 let clients = [];
@@ -27,8 +28,12 @@ export const sendNotification = async ({ recipient, sender, title, message, type
     // Populate sender details for notifications UI
     const populated = await Notification.findById(notification._id).populate('sender', 'name');
 
-    // Broadcast in real-time to active SSE streams for this user
     const recipientIdStr = recipient.toString();
+
+    // Broadcast in real-time to active Socket.IO connections
+    emitNotificationCreated(populated, recipientIdStr);
+
+    // Broadcast in real-time to active SSE streams for this user
     const userStreams = clients.filter(c => c.userId === recipientIdStr);
     
     userStreams.forEach(client => {
