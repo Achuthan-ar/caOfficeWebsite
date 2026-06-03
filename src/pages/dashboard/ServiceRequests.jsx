@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import api from '../../services/api';
 import { useAuthStore } from '../../store/authStore';
+import { useNotificationStore } from '../../store/notificationStore';
 import {
   MessageSquare,
   Send,
@@ -16,6 +17,9 @@ import {
 
 const ServiceRequests = () => {
   const { user } = useAuthStore();
+  const { notifications } = useNotificationStore();
+  const lastProcessedNotificationIdRef = useRef(null);
+
   const isClient = user?.role?.name === 'Client';
   const canAssignSpecialist = ['Admin', 'Manager', 'TL'].includes(user?.role?.name);
 
@@ -101,6 +105,17 @@ const ServiceRequests = () => {
       }
     }
   }, [tickets, selectedTicket]);
+
+  // Real-time synchronization: listen for new ticket-type notifications and silently refresh lists
+  useEffect(() => {
+    if (notifications.length > 0) {
+      const latest = notifications[0];
+      if (latest.type === 'Ticket' && latest._id !== lastProcessedNotificationIdRef.current) {
+        lastProcessedNotificationIdRef.current = latest._id;
+        fetchTickets(true);
+      }
+    }
+  }, [notifications, fetchTickets]);
 
   const handleRaiseTicket = async (e) => {
     e.preventDefault();
