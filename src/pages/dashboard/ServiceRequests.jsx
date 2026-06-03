@@ -54,8 +54,8 @@ const ServiceRequests = () => {
     Closed: 'bg-slate-100 text-slate-500 dark:bg-slate-900 border border-slate-200 dark:border-slate-800',
   };
 
-  const fetchTickets = useCallback(async () => {
-    setLoading(true);
+  const fetchTickets = useCallback(async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     try {
       const response = await api.get('/tickets');
       if (response.data?.success) {
@@ -65,7 +65,7 @@ const ServiceRequests = () => {
       console.error('Error fetching tickets:', err);
       setError('Failed to fetch support tickets.');
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   }, []);
 
@@ -91,10 +91,7 @@ const ServiceRequests = () => {
     if (selectedTicket && tickets.length > 0) {
       const updated = tickets.find(t => t._id === selectedTicket._id);
       if (updated) {
-        const hasChanged =
-          updated.status !== selectedTicket.status ||
-          updated.comments?.length !== selectedTicket.comments?.length ||
-          (updated.assignedTo?._id || '') !== (selectedTicket.assignedTo?._id || '');
+        const hasChanged = JSON.stringify(updated) !== JSON.stringify(selectedTicket);
         
         if (hasChanged) {
           setSelectedTicket(updated);
@@ -150,7 +147,7 @@ const ServiceRequests = () => {
       });
       if (response.data?.success) {
         setCommentText('');
-        fetchTickets();
+        fetchTickets(true);
       }
     } catch (err) {
       console.error('Failed to post reply:', err);
@@ -173,7 +170,7 @@ const ServiceRequests = () => {
       }
       const response = await api.put(`/tickets/${selectedTicket._id}`, payload);
       if (response.data?.success) {
-        fetchTickets();
+        fetchTickets(true);
       }
     } catch (err) {
       console.error('Failed to update ticket status:', err);
