@@ -18,6 +18,10 @@ import InternshipReport from '../models/InternshipReport.js';
 import Client from '../models/Client.js';
 import ClientDocument from '../models/ClientDocument.js';
 import MonthlyReport from '../models/MonthlyReport.js';
+import DocumentRequest from '../models/DocumentRequest.js';
+import Invoice from '../models/Invoice.js';
+import Ticket from '../models/Ticket.js';
+import Compliance from '../models/Compliance.js';
 
 // Helper to get local date string YYYY-MM-DD
 const getLocalDateString = (date = new Date()) => {
@@ -815,6 +819,7 @@ const seedDB = async () => {
 
     // 16. Seed Client Documents
     const clientDocCount = await ClientDocument.countDocuments();
+    let seededClientDoc = null;
     if (clientDocCount === 0 && clientProfile && clientUser) {
       console.log('No client documents found. Seeding mock Client documents...');
       const tlUser = usersList.find(u => u.email === 'tl@company.com');
@@ -823,7 +828,7 @@ const seedDB = async () => {
         {
           client: clientProfile._id,
           name: 'Q4 Audited Balance Sheet 2025',
-          documentType: 'Financial statements',
+          documentType: 'Audit',
           fileUrl: 'https://example-documents.com/apex_q4_balance_sheet.pdf',
           uploadedBy: clientUser._id,
           status: 'Uploaded',
@@ -832,7 +837,7 @@ const seedDB = async () => {
         {
           client: clientProfile._id,
           name: 'GST Challan GSTR-3B April',
-          documentType: 'GST documents',
+          documentType: 'GST',
           fileUrl: 'https://example-documents.com/apex_gst_challan_april.pdf',
           uploadedBy: tlUser?._id || clientUser._id,
           status: 'Approved',
@@ -840,8 +845,11 @@ const seedDB = async () => {
         }
       ];
 
-      await ClientDocument.create(mockDocs);
+      const createdDocs = await ClientDocument.create(mockDocs);
+      seededClientDoc = createdDocs[0];
       console.log('Mock client documents seeded successfully!');
+    } else {
+      seededClientDoc = await ClientDocument.findOne({});
     }
 
     // 17. Seed Employee Monthly Reports
@@ -888,6 +896,219 @@ const seedDB = async () => {
         ]);
       }
       console.log('Mock monthly reports seeded successfully!');
+    }
+
+    // 18. Seed Compliance Deadlines
+    const complianceCount = await Compliance.countDocuments();
+    if (complianceCount === 0) {
+      console.log('No compliance deadlines found. Seeding compliance deadlines...');
+      const sampleDeadlines = [
+        {
+          title: 'GSTR-1 GST Return filing (Monthly)',
+          category: 'GSTR-1',
+          dueDate: new Date(new Date().getFullYear(), new Date().getMonth(), 11),
+          description: 'Filing of GSTR-1 outward supplies for Apex Logistics & general clients.',
+          status: 'Pending',
+          colorCode: '#f59e0b'
+        },
+        {
+          title: 'GSTR-3B GST Return summary & tax (Monthly)',
+          category: 'GSTR-3B',
+          dueDate: new Date(new Date().getFullYear(), new Date().getMonth(), 20),
+          description: 'Filing summary GSTR-3B tax offset and payment matching.',
+          status: 'Pending',
+          colorCode: '#10b981'
+        },
+        {
+          title: 'Quarterly TDS Returns filing (Form 24Q/26Q)',
+          category: 'TDS Returns',
+          dueDate: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 31),
+          description: 'Quarterly salary and non-salary TDS returns statement filing.',
+          status: 'Pending',
+          colorCode: '#3b82f6'
+        },
+        {
+          title: 'Income Tax Return (ITR) non-audit filing',
+          category: 'Income Tax Filing',
+          dueDate: new Date(new Date().getFullYear(), 6, 31), // 31st July
+          description: 'Individual non-audit tax return files submission deadline.',
+          status: 'Pending',
+          colorCode: '#ef4444'
+        },
+        {
+          title: 'ROC annual filing form AOC-4 & MGT-7',
+          category: 'ROC Filing',
+          dueDate: new Date(new Date().getFullYear(), 9, 30), // 30th October
+          description: 'ROC financial disclosures and board director list audits.',
+          status: 'Pending',
+          colorCode: '#8b5cf6'
+        },
+        {
+          title: 'Statutory Tax Audit Report compliance',
+          category: 'Audit Deadlines',
+          dueDate: new Date(new Date().getFullYear(), 8, 30), // 30th September
+          description: 'Corporate audit reports sign-offs and returns verification.',
+          status: 'Pending',
+          colorCode: '#ec4899'
+        }
+      ];
+      await Compliance.create(sampleDeadlines);
+      console.log('Compliance deadlines seeded successfully!');
+    }
+
+    // 19. Seed Billing & Invoices
+    const invoiceCount = await Invoice.countDocuments();
+    if (invoiceCount === 0 && clientProfile) {
+      console.log('No invoices found. Seeding mock Invoices...');
+      const sampleInvoices = [
+        {
+          invoiceNumber: 'INV-2026-001',
+          client: clientProfile._id,
+          serviceName: 'GSTR-1 & 3B Monthly Filing (April 2026)',
+          amount: 2500,
+          dueDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), // 10 days ago
+          status: 'Paid',
+          paymentHistory: [{
+            amountPaid: 2500,
+            paymentDate: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000),
+            transactionId: 'TXN-902919'
+          }],
+          outstandingBalance: 0
+        },
+        {
+          invoiceNumber: 'INV-2026-002',
+          client: clientProfile._id,
+          serviceName: 'Company Advisory Incorporation Services',
+          amount: 15000,
+          dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
+          status: 'Unpaid',
+          outstandingBalance: 15000
+        },
+        {
+          invoiceNumber: 'INV-2026-003',
+          client: clientProfile._id,
+          serviceName: 'Statutory Ledger Audit & Tax Return FY 25-26',
+          amount: 45000,
+          dueDate: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000), // 20 days from now
+          status: 'Partially Paid',
+          paymentHistory: [{
+            amountPaid: 25000,
+            paymentDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+            transactionId: 'TXN-773909'
+          }],
+          outstandingBalance: 20000
+        }
+      ];
+      await Invoice.create(sampleInvoices);
+      console.log('Invoices seeded successfully!');
+    }
+
+    // 20. Seed Document Requests
+    const requestCount = await DocumentRequest.countDocuments();
+    if (requestCount === 0 && clientProfile && usersList.length > 0) {
+      console.log('No document requests found. Seeding mock requests...');
+      const adminUser = usersList.find(u => u.email === 'admin@company.com');
+      const tlUser = usersList.find(u => u.email === 'tl@company.com');
+      const managerUser = usersList.find(u => u.email === 'manager@company.com');
+
+      const sampleRequests = [
+        {
+          requestId: 'REQ-2026-0001',
+          client: clientProfile._id,
+          requestedBy: adminUser?._id || usersList[0]._id,
+          requestedByRole: 'Admin',
+          documentName: 'Sales Bills GST',
+          category: 'GST',
+          description: 'Sales summaries or spreadsheets for active filings.',
+          priority: 'High',
+          dueDate: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000),
+          status: 'Requested'
+        },
+        {
+          requestId: 'REQ-2026-0002',
+          client: clientProfile._id,
+          requestedBy: tlUser?._id || usersList[0]._id,
+          requestedByRole: 'TL',
+          documentName: 'Q4 Audited Balance Sheet 2025',
+          category: 'Audit',
+          description: 'Audited assets and capital balances worksheet.',
+          priority: 'Medium',
+          dueDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
+          status: 'Uploaded',
+          uploadedDocument: seededClientDoc?._id
+        },
+        {
+          requestId: 'REQ-2026-0003',
+          client: clientProfile._id,
+          requestedBy: managerUser?._id || usersList[0]._id,
+          requestedByRole: 'Manager',
+          documentName: 'Bank Statement FY 25-26',
+          category: 'Audit',
+          description: 'Consolidated statement of active current accounts.',
+          priority: 'Critical',
+          dueDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // Overdue
+          status: 'Overdue',
+          reminderCount: 2,
+          lastReminderSent: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000)
+        }
+      ];
+      await DocumentRequest.create(sampleRequests);
+      console.log('Document requests seeded successfully!');
+    }
+
+    // 21. Seed Service Request Tickets
+    const ticketCount = await Ticket.countDocuments();
+    if (ticketCount === 0 && clientProfile && usersList.length > 0) {
+      console.log('No support tickets found. Seeding mock tickets...');
+      const tlUser = usersList.find(u => u.email === 'tl@company.com');
+
+      const sampleTickets = [
+        {
+          ticketNumber: 'TKT-2026-001',
+          client: clientProfile._id,
+          category: 'GST',
+          title: 'ITC Verification Mismatch',
+          description: 'GSTR-2B is showing lower Input Tax Credit compared to our ledger registration details. Please verify the matching receipts.',
+          status: 'Open',
+          activityTimeline: [{
+            action: 'Ticket created by client',
+            performedBy: clientProfile.user,
+            timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
+          }]
+        },
+        {
+          ticketNumber: 'TKT-2026-002',
+          client: clientProfile._id,
+          category: 'Audit',
+          title: 'Capital Reserves audit advice',
+          description: 'Please review the reserves reallocation and advise on appropriate disclosures for the directors report.',
+          status: 'In Progress',
+          assignedTo: tlUser?._id,
+          comments: [
+            {
+              user: tlUser?._id || usersList[0]._id,
+              userName: tlUser?.name || 'Team Lead',
+              role: 'TL',
+              comment: 'We have analyzed the reserves transfer entries. It requires a note under Section 135 disclosures. Will send the draft text shortly.',
+              timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000)
+            }
+          ],
+          activityTimeline: [
+            {
+              action: 'Ticket created by client',
+              performedBy: clientProfile.user,
+              timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000)
+            },
+            {
+              action: 'Ticket assigned to Team Lead',
+              performedBy: usersList[0]._id, // Admin
+              timestamp: new Date(Date.now() - 18 * 60 * 60 * 1000)
+            }
+          ]
+        }
+      ];
+      await Ticket.create(sampleTickets);
+      console.log('Support tickets seeded successfully!');
     }
 
   } catch (error) {

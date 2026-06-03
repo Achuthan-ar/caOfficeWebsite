@@ -24,6 +24,10 @@ import internshipRoutes from './routes/internshipRoutes.js';
 import clientRoutes from './routes/clientRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
+import documentRequestRoutes from './routes/documentRequestRoutes.js';
+import invoiceRoutes from './routes/invoiceRoutes.js';
+import ticketRoutes from './routes/ticketRoutes.js';
+import complianceRoutes from './routes/complianceRoutes.js';
 import path from 'path';
 
 // Load environment variables
@@ -46,7 +50,7 @@ app.use(cookieParser());
 // Rate limiter for security (brute-force protection on Auth endpoints)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per 15 mins
+  max: process.env.NODE_ENV === 'production' ? 100 : 10000, // Bypass rate limit lockouts in dev
   message: {
     success: false,
     message: 'Too many requests from this IP, please try again after 15 minutes',
@@ -58,7 +62,7 @@ const authLimiter = rateLimit({
 // General API rate limiter for overall system protection
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 500, // Limit each IP to 500 requests per 15 mins
+  max: process.env.NODE_ENV === 'production' ? 500 : 50000, // Bypass rate limit lockouts in dev
   message: {
     success: false,
     message: 'Too many requests, please try again later.',
@@ -130,6 +134,10 @@ app.use('/api/internships', internshipRoutes);
 app.use('/api/clients', clientRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/document-requests', documentRequestRoutes);
+app.use('/api/invoices', invoiceRoutes);
+app.use('/api/tickets', ticketRoutes);
+app.use('/api/compliance', complianceRoutes);
 
 // Serve uploads directory as a static folder for local storage uploads fallback
 app.use('/uploads', express.static(path.resolve('uploads')));

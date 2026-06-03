@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import api from '../services/api';
 import {
@@ -7,6 +8,7 @@ import {
   Server,
   TrendingUp,
   FolderKanban,
+  FileText,
   Clock,
   AlertCircle,
   Clock4,
@@ -857,9 +859,9 @@ const InternDashboard = ({ data, attendanceData }) => {
                 </div>
               ))}
             </div>
-          </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };
@@ -868,84 +870,117 @@ const InternDashboard = ({ data, attendanceData }) => {
    CLIENT PORTAL DASHBOARD WIDGET
    ============================================================================ */
 const ClientDashboard = ({ data }) => {
+  const cards = [
+    { title: 'Active Services', value: data?.stats?.activeServices || 0, icon: Server, color: 'text-indigo-500 bg-indigo-500/10 border-indigo-500/20' },
+    { title: 'Pending Tasks', value: data?.stats?.pendingTasks || 0, icon: FolderKanban, color: 'text-amber-500 bg-amber-500/10 border-amber-500/20' },
+    { title: 'Pending Documents', value: data?.stats?.pendingDocuments || 0, icon: FileText, color: 'text-blue-500 bg-blue-500/10 border-blue-500/20' },
+    { title: 'Documents Requested', value: data?.stats?.documentsRequested || 0, icon: AlertCircle, color: 'text-rose-500 bg-rose-500/10 border-rose-500/20' },
+    { title: 'Filed Returns', value: data?.stats?.filedReturns || 0, icon: Award, color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20' },
+    { title: 'Outstanding Invoices', value: data?.stats?.outstandingInvoices || 0, icon: Receipt, color: 'text-red-500 bg-red-500/10 border-red-500/20' },
+    { title: 'Open Tickets', value: data?.stats?.openTickets || 0, icon: Clock, color: 'text-orange-500 bg-orange-500/10 border-orange-500/20' },
+    { title: 'Notifications', value: data?.stats?.notifications || 0, icon: Bell, color: 'text-purple-500 bg-purple-500/10 border-purple-500/20' },
+  ];
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div className="lg:col-span-1 space-y-6">
-        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-xl p-5 shadow-sm space-y-4">
-          <h3 className="text-base font-bold text-slate-800 dark:text-white font-heading">
-            Client Details
-          </h3>
-          <hr className="border-slate-100 dark:border-slate-900" />
-          
-          <div className="space-y-3.5 text-xs">
-            <div>
-              <span className="text-slate-400 font-medium">Company Name:</span>
-              <p className="font-bold text-slate-850 dark:text-slate-200 mt-0.5">{data?.companyName}</p>
-            </div>
-            <div>
-              <span className="text-slate-400 font-medium">Assigned Auditor:</span>
-              <p className="font-bold text-slate-850 dark:text-slate-200 mt-0.5">{data?.accountManager}</p>
-            </div>
-            <div className="pt-1.5 flex items-center justify-between border-t border-slate-100 dark:border-slate-900">
-              <span className="text-slate-400 font-semibold uppercase tracking-wider text-[10px]">Billing Ledger</span>
-              <span className="inline-flex items-center gap-1.5 text-emerald-500 font-bold bg-emerald-500/10 border border-emerald-500/20 rounded px-2 py-0.5">
-                <Receipt className="h-3.5 w-3.5" />
-                {data?.billingStatus}
-              </span>
-            </div>
-          </div>
+    <div className="space-y-6 text-xs">
+      
+      {/* Company Name & Balance Overview Banner */}
+      <div className="bg-gradient-to-tr from-indigo-500 to-indigo-600 rounded-2xl p-6 text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-xl shadow-indigo-500/10">
+        <div>
+          <span className="text-[10px] font-black uppercase tracking-wider text-indigo-200">Corporate Portal</span>
+          <h3 className="text-xl font-extrabold font-heading mt-1">{data?.companyName}</h3>
+          <p className="text-[11px] text-indigo-100 mt-0.5">Assigned Advisory: D.K. Nagarajan Associates</p>
+        </div>
+        <div className="bg-white/10 border border-white/20 rounded-xl px-4.5 py-2.5">
+          <span className="text-[9px] font-bold text-indigo-200 block uppercase">Retainer Billing Ledger</span>
+          <span className="text-lg font-black block mt-0.5">{data?.billingStatus}</span>
         </div>
       </div>
 
-      <div className="lg:col-span-2 space-y-6">
-        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-xl p-5 shadow-sm space-y-4">
-          <h3 className="text-base font-bold text-slate-800 dark:text-white font-heading">
-            Corporate Files Progress
+      {/* Grid: 4x2 Dashboard Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        {cards.map((card, i) => {
+          const Icon = card.icon;
+          return (
+            <div key={i} className="bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800/80 rounded-xl p-4.5 shadow-sm transition hover:shadow-md">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-[9px] font-bold text-slate-450 uppercase tracking-wider block">{card.title}</span>
+                  <span className="text-xl font-black text-slate-800 dark:text-white mt-1 block font-heading">{card.value}</span>
+                </div>
+                <div className={`p-2.5 rounded-lg border shrink-0 ${card.color}`}>
+                  <Icon className="h-4.5 w-4.5" />
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Bottom Layout: Quick Actions & Recent Activities */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        {/* Quick Actions Panel */}
+        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-5 shadow-sm space-y-4">
+          <h3 className="text-sm font-bold text-slate-800 dark:text-white font-heading">
+            Quick Actions Shortcuts
           </h3>
           <hr className="border-slate-100 dark:border-slate-900" />
           
-          <div className="space-y-4">
-            {data?.projectProgress?.map((file, i) => (
-              <div key={i} className="space-y-2">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="font-bold text-slate-800 dark:text-slate-200">{file.serviceName}</span>
-                  <span className="text-indigo-500 font-bold bg-indigo-500/10 px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wide">
-                    {file.status}
-                  </span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <Link
+              to="/document-center"
+              className="p-3 text-center rounded-xl border border-indigo-500/20 bg-indigo-500/[0.02] hover:bg-indigo-500/10 font-bold transition text-indigo-500 cursor-pointer block"
+            >
+              Upload Document
+            </Link>
+            <Link
+              to="/document-requests"
+              className="p-3 text-center rounded-xl border border-amber-500/20 bg-amber-500/[0.02] hover:bg-amber-500/10 font-bold transition text-amber-500 cursor-pointer block"
+            >
+              View Pending Requests
+            </Link>
+            <Link
+              to="/service-requests"
+              className="p-3 text-center rounded-xl border border-orange-500/20 bg-orange-500/[0.02] hover:bg-orange-500/10 font-bold transition text-orange-500 cursor-pointer block"
+            >
+              Raise Service Request
+            </Link>
+            <Link
+              to="/billing-invoices"
+              className="p-3 text-center rounded-xl border border-emerald-500/20 bg-emerald-500/[0.02] hover:bg-emerald-500/10 font-bold transition text-emerald-500 cursor-pointer block"
+            >
+              Download Invoice
+            </Link>
+            <Link
+              to="/compliance-calendar"
+              className="p-3 text-center rounded-xl border border-purple-500/20 bg-purple-500/[0.02] hover:bg-purple-500/10 font-bold transition text-purple-500 cursor-pointer block sm:col-span-2"
+            >
+              View Compliance Calendar
+            </Link>
+          </div>
+        </div>
+
+        {/* Recent Activities Timeline */}
+        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-5 shadow-sm space-y-4">
+          <h3 className="text-sm font-bold text-slate-800 dark:text-white font-heading">
+            Recent Advisory Activities
+          </h3>
+          <hr className="border-slate-100 dark:border-slate-900" />
+          
+          <div className="relative border-l border-slate-200 dark:border-slate-800 pl-4.5 space-y-4 ml-1">
+            {data?.recentActivities?.map((act, i) => (
+              <div key={i} className="relative">
+                <span className="absolute -left-[23px] top-1.5 h-2 w-2 rounded-full bg-indigo-500 border-2 border-white dark:border-slate-950 ring-4 ring-indigo-500/10"></span>
+                <div>
+                  <h4 className="font-bold text-slate-850 dark:text-slate-250 text-xs">{act.title}</h4>
+                  <span className="text-[10px] text-slate-400 font-semibold block mt-0.5">{act.time}</span>
                 </div>
-                <div className="relative w-full h-2 bg-slate-100 dark:bg-slate-900 rounded-full overflow-hidden">
-                  <div className="absolute top-0 bottom-0 left-0 bg-indigo-500 rounded-full" style={{ width: `${file.progress}%` }}></div>
-                </div>
-                <p className="text-[10px] text-right font-semibold text-slate-400">{file.progress}% Audited</p>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-xl p-5 shadow-sm space-y-4">
-          <h3 className="text-base font-bold text-slate-800 dark:text-white font-heading">
-            Open Support Queries
-          </h3>
-          <div className="space-y-3">
-            {data?.tickets?.map((t, i) => (
-              <div key={i} className="flex justify-between items-center text-xs p-3.5 rounded-lg border border-slate-200/50 bg-slate-50/50 dark:border-slate-800/50 dark:bg-slate-900/20">
-                <div className="space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase">{t.id}</span>
-                  <p className="font-bold text-slate-700 dark:text-slate-350">{t.subject}</p>
-                </div>
-                <div className="flex items-center gap-3.5">
-                  <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${
-                    t.status === 'Open' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
-                    'bg-slate-100 text-slate-500 dark:bg-slate-900'
-                  }`}>
-                    {t.status}
-                  </span>
-                  <span className="text-[10px] text-slate-400">Updated {t.lastUpdated}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );

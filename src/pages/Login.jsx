@@ -457,13 +457,7 @@ const Login = () => {
         )}
       </div>
 
-      {!isRegister && (
-        <div className="pt-2 text-center">
-          <p className="text-[10px] text-slate-500 leading-normal">
-            Demo emails: <code className="text-slate-600 bg-slate-100 px-1 py-0.5 rounded">admin@company.com</code>, <code className="text-slate-600 bg-slate-100 px-1 py-0.5 rounded">client@company.com</code> (pass: <code className="text-slate-600 bg-slate-100 px-1 py-0.5 rounded">password123</code>)
-          </p>
-        </div>
-      )}
+
     </form>
   );
 };

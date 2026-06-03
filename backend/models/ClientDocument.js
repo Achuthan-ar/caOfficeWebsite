@@ -15,7 +15,7 @@ const clientDocumentSchema = new mongoose.Schema(
     },
     documentType: {
       type: String,
-      enum: ['GST documents', 'ITR documents', 'Audit reports', 'Financial statements'],
+      enum: ['GST', 'Income Tax', 'Audit', 'ROC', 'Payroll', 'KYC', 'Compliance', 'Others'],
       required: [true, 'Please specify document type'],
     },
     fileUrl: {
@@ -29,13 +29,34 @@ const clientDocumentSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['Uploaded', 'Reviewed', 'Action Needed', 'Approved'],
+      enum: ['Uploaded', 'Under Review', 'Approved', 'Rejected', 'Re-upload Required'],
       default: 'Uploaded',
     },
     remarks: {
       type: String,
       trim: true,
     },
+    versions: [
+      {
+        versionNumber: {
+          type: Number,
+          required: true,
+        },
+        fileUrl: {
+          type: String,
+          required: true,
+        },
+        uploadedBy: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User',
+          required: true,
+        },
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
   },
   {
     timestamps: true,

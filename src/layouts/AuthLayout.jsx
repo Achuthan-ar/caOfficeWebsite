@@ -30,11 +30,10 @@ const AuthLayout = () => {
       {/* Auth Card Container - Light Glassmorphism with primary glow */}
       <div className="w-full max-w-md bg-white border border-slate-200 backdrop-blur-xl rounded-2xl shadow-2xl p-8 z-10 relative glow-primary transition-all duration-300">
         <div className="flex flex-col items-center mb-6">
-          <div className="w-12 h-12 bg-indigo-50 border border-indigo-100 rounded-xl flex items-center justify-center mb-3">
-            <Shield className="w-6 h-6 text-indigo-500" />
-          </div>
-          <h2 className="text-2xl font-bold text-slate-850 tracking-tight font-heading">CA Office ERP</h2>
-          <p className="text-slate-500 text-xs mt-1">Secure Client Management Portal</p>
+          <img src="/favicon.png" alt="D.K. NAGARAJAN Logo" className="h-16 w-16 rounded-full object-cover border border-slate-200 shadow-md mb-3" />
+          <h2 className="text-2xl font-black text-slate-850 tracking-tight font-heading uppercase text-center">D.K. NAGARAJAN</h2>
+          <p className="text-slate-500 text-xs font-semibold tracking-wider uppercase mt-0.5 text-center">Chartered Accountant</p>
+          <p className="text-slate-450 text-[10px] mt-1.5 text-center">Secure Client Management Portal</p>
         </div>
         <Outlet />
       </div>

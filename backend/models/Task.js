@@ -15,6 +15,10 @@ const taskSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
+    assignedManager: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
@@ -31,7 +35,7 @@ const taskSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['Pending', 'In Progress', 'Completed', 'Delayed'],
+      enum: ['Pending', 'In Progress', 'Waiting for Documents', 'Completed', 'Overdue'],
       default: 'Pending',
     },
     progress: {

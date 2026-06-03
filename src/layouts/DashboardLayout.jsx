@@ -20,6 +20,12 @@ import {
   CheckCircle,
   Landmark,
   BarChart2,
+  Folder,
+  Calendar,
+  MessageSquare,
+  Receipt,
+  Settings,
+  User,
 } from 'lucide-react';
 
 const DashboardLayout = () => {
@@ -111,10 +117,52 @@ const DashboardLayout = () => {
       roles: ['Admin', 'Manager', 'TL', 'Employee', 'Intern', 'Client'],
     },
     {
+      title: 'Document Center',
+      path: '/document-center',
+      icon: Folder,
+      roles: ['Admin', 'Manager', 'TL', 'Employee', 'Intern', 'Client'],
+    },
+    {
+      title: 'Document Requests',
+      path: '/document-requests',
+      icon: FileText,
+      roles: ['Admin', 'Manager', 'TL', 'Employee'],
+    },
+    {
+      title: 'Pending Reviews',
+      path: '/pending-documents',
+      icon: Briefcase,
+      roles: ['Admin', 'Manager', 'TL', 'Employee'],
+    },
+    {
       title: 'Task Board',
       path: '/tasks',
       icon: FolderKanban,
-      roles: ['Admin', 'Manager', 'TL', 'Employee', 'Intern'],
+      roles: ['Admin', 'Manager', 'TL', 'Employee', 'Intern', 'Client'],
+    },
+    {
+      title: 'Compliance Calendar',
+      path: '/compliance-calendar',
+      icon: Calendar,
+      roles: ['Admin', 'Manager', 'TL', 'Employee', 'Intern', 'Client'],
+    },
+    {
+      title: 'Billing & Invoices',
+      path: '/billing-invoices',
+      icon: Receipt,
+      roles: ['Admin', 'Manager', 'Client'],
+    },
+    {
+      title: 'Support Tickets',
+      path: '/service-requests',
+      icon: MessageSquare,
+      roles: ['Admin', 'Manager', 'TL', 'Employee', 'Client'],
+    },
+    {
+      title: 'Reports & Analytics',
+      path: '/reports-analytics',
+      icon: BarChart2,
+      roles: ['Admin', 'Manager', 'TL'],
     },
     {
       title: 'Attendance Tracker',
@@ -165,12 +213,6 @@ const DashboardLayout = () => {
       roles: ['Intern'],
     },
     {
-      title: 'Client Portal',
-      path: '/client-dashboard',
-      icon: Landmark,
-      roles: ['Client'],
-    },
-    {
       title: 'Work Reports',
       path: '/monthly-reports',
       icon: BarChart2,
@@ -181,6 +223,12 @@ const DashboardLayout = () => {
       path: '/users',
       icon: Users,
       roles: ['Admin'],
+    },
+    {
+      title: 'Profile Settings',
+      path: '/profile-settings',
+      icon: Settings,
+      roles: ['Admin', 'Manager', 'TL', 'Employee', 'Intern', 'Client'],
     },
   ];
 
@@ -214,12 +262,15 @@ const DashboardLayout = () => {
       >
         <div className="flex h-16 items-center justify-between px-6 border-b border-slate-200 dark:border-slate-800">
           <Link to="/dashboard" className="flex items-center gap-2">
-            <div className="rounded-lg bg-indigo-500 p-1.5 text-white">
-              <Briefcase className="h-5 w-5" />
+            <img src="/favicon.png" alt="D.K. NAGARAJAN Logo" className="h-8 w-8 rounded-full object-cover border border-slate-200 dark:border-slate-800" />
+            <div className="flex flex-col text-left">
+              <span className="font-heading text-sm font-black tracking-wide text-slate-800 dark:text-white uppercase leading-none">
+                D.K. NAGARAJAN
+              </span>
+              <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 tracking-wider uppercase leading-none mt-1">
+                Chartered Accountant
+              </span>
             </div>
-            <span className="font-heading text-lg font-bold text-slate-800 dark:text-white">
-              CA Office ERP
-            </span>
           </Link>
           <button
             onClick={() => setIsSidebarOpen(false)}

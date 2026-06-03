@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import Role from '../models/Role.js';
+import Permission from '../models/Permission.js';
 
 // Protect routes - Verify Access Token
 export const protect = async (req, res, next) => {

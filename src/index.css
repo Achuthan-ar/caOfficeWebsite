@@ -164,3 +164,18 @@ h1, h2, h3, h4, h5, h6 {
 .dark .glow-brand {
   box-shadow: 0 0 50px -5px rgba(139, 92, 246, 0.25);
 }
+
+/* Custom Option styling for cross-browser dark-mode text contrast visibility */
+select {
+  color-scheme: light dark;
+}
+
+select option {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+.dark select option {
+  background-color: #0f172a;
+  color: #ffffff;
+}

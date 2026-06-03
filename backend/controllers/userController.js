@@ -168,3 +168,68 @@ export const updateUserPassword = async (req, res) => {
   }
 };
 
+// @desc    Update self user profile (phone, address)
+// @route   PUT /api/users/profile
+// @access  Private (All authenticated users)
+export const updateProfile = async (req, res) => {
+  const { phone, address } = req.body;
+
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    if (phone !== undefined) user.phone = phone;
+    if (address !== undefined) user.address = address;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Profile updated successfully',
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        address: user.address,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Update self user password
+// @route   PUT /api/users/change-password
+// @access  Private (All authenticated users)
+export const updateSelfPassword = async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+
+  if (!oldPassword || !newPassword || newPassword.length < 6) {
+    return res.status(400).json({ success: false, message: 'Old and new passwords (min 6 chars) are required.' });
+  }
+
+  try {
+    const user = await User.findById(req.user._id).select('+password');
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const isMatch = await user.comparePassword(oldPassword);
+    if (!isMatch) {
+      return res.status(400).json({ success: false, message: 'Incorrect current password' });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Password changed successfully',
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+

@@ -47,6 +47,7 @@ const AttendanceReport = lazy(() => import('../pages/dashboard/AttendanceReport'
 
 const LeaveManager = lazy(() => import('../pages/dashboard/LeaveManager'));
 const TaskKanban = lazy(() => import('../pages/dashboard/TaskKanban'));
+const TaskTracker = lazy(() => import('../pages/dashboard/TaskTracker'));
 const TaskForm = lazy(() => import('../pages/dashboard/TaskForm'));
 
 const ApplicationReviews = lazy(() => import('../pages/dashboard/ApplicationReviews'));
@@ -56,6 +57,16 @@ const CertificateView = lazy(() => import('../pages/dashboard/CertificateView'))
 
 const ClientDashboard = lazy(() => import('../pages/dashboard/ClientDashboard'));
 const MonthlyReports = lazy(() => import('../pages/dashboard/MonthlyReports'));
+
+const DocumentCenter = lazy(() => import('../pages/dashboard/DocumentCenter'));
+const DocumentRequests = lazy(() => import('../pages/dashboard/DocumentRequests'));
+const PendingDocuments = lazy(() => import('../pages/dashboard/PendingDocuments'));
+const ComplianceCalendar = lazy(() => import('../pages/dashboard/ComplianceCalendar'));
+const BillingInvoices = lazy(() => import('../pages/dashboard/BillingInvoices'));
+const ServiceRequests = lazy(() => import('../pages/dashboard/ServiceRequests'));
+const NotificationCenter = lazy(() => import('../pages/dashboard/NotificationCenter'));
+const ReportsAnalytics = lazy(() => import('../pages/dashboard/ReportsAnalytics'));
+const ProfileSettings = lazy(() => import('../pages/dashboard/ProfileSettings'));
 
 const AppRoutes = () => {
   const { isAuthenticated } = useAuthStore();
@@ -93,9 +104,32 @@ const AppRoutes = () => {
 
               {/* Leave Management & Tasks (accessible to all authenticated staff roles) */}
               <Route path="/leaves" element={<LeaveManager />} />
-              <Route path="/tasks" element={<TaskKanban />} />
+              <Route path="/tasks" element={<TaskTracker />} />
               <Route path="/intern-portal" element={<InternPortal />} />
               <Route path="/certificate/:id" element={<CertificateView />} />
+              
+              {/* Shared Document Center, Compliance, Tickets, Profile & Notifications (accessible to all authenticated roles) */}
+              <Route path="/document-center" element={<DocumentCenter />} />
+              <Route path="/compliance-calendar" element={<ComplianceCalendar />} />
+              <Route path="/service-requests" element={<ServiceRequests />} />
+              <Route path="/notifications-center" element={<NotificationCenter />} />
+              <Route path="/profile-settings" element={<ProfileSettings />} />
+
+              {/* Document Request & Pending Upload Review (accessible to all staff roles) */}
+              <Route element={<ProtectedRoute allowedRoles={['Admin', 'Manager', 'TL', 'Employee']} />}>
+                <Route path="/document-requests" element={<DocumentRequests />} />
+                <Route path="/pending-documents" element={<PendingDocuments />} />
+              </Route>
+
+              {/* Invoices (accessible to Admin, Manager, and Client roles) */}
+              <Route element={<ProtectedRoute allowedRoles={['Admin', 'Manager', 'Client']} />}>
+                <Route path="/billing-invoices" element={<BillingInvoices />} />
+              </Route>
+
+              {/* Reports & Analytics (accessible to Admin, Manager, and Team Lead roles) */}
+              <Route element={<ProtectedRoute allowedRoles={['Admin', 'Manager', 'TL']} />}>
+                <Route path="/reports-analytics" element={<ReportsAnalytics />} />
+              </Route>
               
               {/* Create/Edit Task - Manager and TL only */}
               <Route element={<ProtectedRoute allowedRoles={['Manager', 'TL']} />}>

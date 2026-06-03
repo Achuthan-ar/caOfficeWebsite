@@ -30,12 +30,15 @@ const PublicLayout = () => {
           
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <div className="rounded-lg bg-indigo-500 p-1.5 text-white">
-              <Briefcase className="h-5 w-5" />
+            <img src="/favicon.png" alt="D.K. NAGARAJAN Logo" className="h-8 w-8 rounded-full object-cover border border-slate-200 dark:border-slate-800" />
+            <div className="flex flex-col text-left">
+              <span className="font-heading text-sm font-black tracking-wide text-slate-850 dark:text-white uppercase leading-none">
+                D.K. NAGARAJAN
+              </span>
+              <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 tracking-wider uppercase leading-none mt-1">
+                Chartered Accountant
+              </span>
             </div>
-            <span className="font-heading text-lg font-bold text-slate-850 dark:text-white">
-              CA Office ERP
-            </span>
           </Link>
 
           {/* Desktop Navigation Links */}
@@ -120,12 +123,15 @@ const PublicLayout = () => {
           {/* Logo & Description */}
           <div className="space-y-4">
             <Link to="/" className="flex items-center gap-2">
-              <div className="rounded-lg bg-indigo-500 p-1.5 text-white">
-                <Briefcase className="h-5 w-5" />
+              <img src="/favicon.png" alt="D.K. NAGARAJAN Logo" className="h-8 w-8 rounded-full object-cover border border-slate-200 dark:border-slate-850" />
+              <div className="flex flex-col text-left">
+                <span className="font-heading text-sm font-black tracking-wide text-slate-850 dark:text-white uppercase leading-none">
+                  D.K. NAGARAJAN
+                </span>
+                <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 tracking-wider uppercase leading-none mt-1">
+                  Chartered Accountant
+                </span>
               </div>
-              <span className="font-heading text-lg font-bold text-slate-850 dark:text-white">
-                CA Office
-              </span>
             </Link>
             <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
               Professional accounting, auditing, taxation, and company compliance advisors. Helping startups and corporate giants grow securely.
@@ -209,7 +215,7 @@ const PublicLayout = () => {
         </div>
 
         <div className="max-w-7xl mx-auto mt-10 pt-6 border-t border-slate-200 dark:border-slate-900 text-center text-xs text-slate-400 dark:text-slate-500">
-          <p>© {new Date().getFullYear()} CA Office ERP & Promotional Platform. All Rights Reserved. Pair programmed with Antigravity.</p>
+          <p>© {new Date().getFullYear()} D.K. NAGARAJAN & Co. All Rights Reserved. Pair programmed with Antigravity.</p>
         </div>
       </footer>
     </div>
