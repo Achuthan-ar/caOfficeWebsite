@@ -123,6 +123,15 @@ const TaskForm = () => {
       await fetchDependencies();
       if (isEditMode) {
         await fetchTaskDetails();
+      } else {
+        try {
+          const response = await api.get('/tasks/next-id');
+          if (response.data?.success) {
+            setTaskId(response.data.taskId);
+          }
+        } catch (err) {
+          console.error('Error fetching next Task ID:', err.message);
+        }
       }
     };
     init();
@@ -142,6 +151,7 @@ const TaskForm = () => {
 
     const payload = {
       ...data,
+      taskId: taskId || null,
       clientId: data.clientId || null,
       assignedEmployee: data.assignedEmployee || null,
       assignedTeamLead: data.assignedTeamLead || null,
@@ -221,8 +231,8 @@ const TaskForm = () => {
 
       {/* Form Card */}
       <form onSubmit={handleSubmit(onSubmit)} className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-xl p-6 shadow-sm space-y-5">
-        {/* Task ID (Edit Mode only) */}
-        {isEditMode && taskId && (
+        {/* Task ID (Auto Generated) */}
+        {taskId && (
           <div className="space-y-1">
             <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Task ID (Auto Generated)</label>
             <input

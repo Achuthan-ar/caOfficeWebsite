@@ -124,11 +124,34 @@ const getScopedQuery = async (req) => {
   return query;
 };
 
+// @desc    Get next Task ID
+// @route   GET /api/tasks/next-id
+// @access  Private (Admin, CA Login, Manager)
+export const getNextTaskId = async (req, res) => {
+  try {
+    const lastTask = await Task.findOne({
+      taskId: { $regex: /^T\d+$/ }
+    }).sort({ taskId: -1 });
+
+    let nextNum = 1001;
+    if (lastTask && lastTask.taskId) {
+      const lastNum = parseInt(lastTask.taskId.replace('T', ''), 10);
+      if (!isNaN(lastNum) && lastNum >= 1001) {
+        nextNum = lastNum + 1;
+      }
+    }
+    return res.status(200).json({ success: true, taskId: `T${nextNum}` });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 // @desc    Create a new task
 // @route   POST /api/tasks
 // @access  Private (Admin, Manager, TL)
 export const createTask = async (req, res) => {
   const {
+    taskId,
     taskName,
     financialYear,
     taskDescription,
@@ -169,6 +192,7 @@ export const createTask = async (req, res) => {
     }
 
     const task = await Task.create({
+      taskId,
       taskName,
       financialYear,
       taskDescription,

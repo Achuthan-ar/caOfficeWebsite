@@ -108,6 +108,7 @@ export const leaveSchema = {
 };
 
 export const taskSchema = {
+  taskId: { type: 'string' },
   taskName: { required: true, type: 'string', min: 3, max: 100 },
   financialYear: { type: 'string' },
   taskDescription: { type: 'string' },

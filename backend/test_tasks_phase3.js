@@ -21,10 +21,10 @@ const runTests = async () => {
     console.log('Resolving user roles and profiles...');
     const adminRole = await Role.findOne({ name: 'Admin' });
     const employeeRole = await Role.findOne({ name: 'Employee' });
-    const tlRole = await Role.findOne({ name: 'TL' });
+    const tlRole = await Role.findOne({ name: 'Manager' });
 
     if (!adminRole || !employeeRole || !tlRole) {
-      throw new Error('Required roles (Admin, Employee, TL) not found in DB. Run database seeds first.');
+      throw new Error('Required roles (Admin, Employee, Manager) not found in DB. Run database seeds first.');
     }
 
     const adminUser = await User.findOne({ role: adminRole._id });
@@ -47,6 +47,8 @@ const runTests = async () => {
         clientName: 'Test Client Corp',
         clientId: 'C888',
         phoneNumber: '9999999999',
+        clientType: 'Individuals',
+        regularityType: 'Regular',
         status: 'Active',
       });
     }
