@@ -64,17 +64,7 @@ const ClientForm = () => {
   ]);
   const [caseTypes, setCaseTypes] = useState(['GST Filing', 'Income Tax Filing', 'Statutory Audit', 'Internal Audit', 'TDS Filing', 'Company Registration']);
   const [regularityTypes, setRegularityTypes] = useState(['Regular', 'Irregular', 'Inactive']);
-  const [serviceOptions, setServiceOptions] = useState([
-    'GST GSTR-1',
-    'GST GSTR-3B',
-    'Income Tax ITR-1/2',
-    'Income Tax ITR-3/4',
-    'Income Tax ITR-5/6',
-    'Tax Audit Form 3CD',
-    'Statutory Audit',
-    'TDS Returns',
-    'ROC Compliances',
-  ]);
+  const [serviceOptions, setServiceOptions] = useState([]);
   const [accountantOptions, setAccountantOptions] = useState(['CA Ramesh', 'CA Suresh', 'CA Priya']);
 
   // Fetch staff users to populate assignments dropdowns

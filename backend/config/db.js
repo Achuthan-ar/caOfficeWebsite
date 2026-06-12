@@ -1111,8 +1111,72 @@ const seedDB = async () => {
           ]
         }
       ];
-      await Ticket.create(sampleTickets);
+      const createdTickets = await Ticket.create(sampleTickets);
       console.log('Support tickets seeded successfully!');
+    }
+
+    // 22. Seed Master Services, Case Types, & Associates
+    const { ServiceMaster, AccountantMaster, CaseTypeMaster } = await import('../models/masterModels.js');
+    const adminUser = usersList.find(u => u.email === 'admin@company.com');
+    if (adminUser) {
+      const servicesCount = await ServiceMaster.countDocuments();
+      if (servicesCount === 0) {
+        console.log('Seeding default services master options...');
+        const defaultServices = [
+          'GST GSTR-1',
+          'GST GSTR-3B',
+          'Income Tax ITR-1/2',
+          'Income Tax ITR-3/4',
+          'Income Tax ITR-5/6',
+          'Tax Audit Form 3CD',
+          'Statutory Audit',
+          'TDS Returns',
+          'ROC Compliances',
+        ];
+        await ServiceMaster.insertMany(defaultServices.map(name => ({
+          name,
+          description: `${name} standard service option`,
+          status: 'Active',
+          createdBy: adminUser._id
+        })));
+        console.log('Seeded default services successfully!');
+      }
+
+      const caseTypesCount = await CaseTypeMaster.countDocuments();
+      if (caseTypesCount === 0) {
+        console.log('Seeding default case types master options...');
+        const defaultCaseTypes = [
+          'GST Filing',
+          'Income Tax Filing',
+          'Statutory Audit',
+          'Internal Audit',
+          'TDS Filing',
+          'Company Registration',
+        ];
+        await CaseTypeMaster.insertMany(defaultCaseTypes.map(name => ({
+          name,
+          description: `${name} case type option`,
+          status: 'Active',
+          createdBy: adminUser._id
+        })));
+        console.log('Seeded default case types successfully!');
+      }
+
+      const accountantsCount = await AccountantMaster.countDocuments();
+      if (accountantsCount === 0) {
+        console.log('Seeding default associates master options...');
+        const defaultAssociates = [
+          { associate_name: 'CA Ramesh', email: 'ramesh@company.com', phone_number: '9888877777' },
+          { associate_name: 'CA Suresh', email: 'suresh@company.com', phone_number: '9777766666' },
+          { associate_name: 'CA Priya', email: 'priya@company.com', phone_number: '9666655555' },
+        ];
+        await AccountantMaster.insertMany(defaultAssociates.map(assoc => ({
+          ...assoc,
+          status: 'Active',
+          createdBy: adminUser._id
+        })));
+        console.log('Seeded default associates successfully!');
+      }
     }
 
   } catch (error) {

@@ -45,6 +45,7 @@ export const getMasterList = async (req, res) => {
   const Model = getModel(req, res);
   if (!Model) return;
 
+  const { category } = req.params;
   const { search, status, sortBy, order, page, limit } = req.query;
 
   try {
