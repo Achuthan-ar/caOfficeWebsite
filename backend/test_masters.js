@@ -48,7 +48,7 @@ async function testMasters() {
     console.log(`✓ Admin user: ${adminUser.name} (${adminUser._id})\n`);
 
     // Clean up any leftovers from previous test run
-    await Client.deleteMany({ clientId: 'C999' });
+    await Client.deleteMany({ clientId: 'C002' });
     const ClientTypeModel = getMasterModel('client-types');
     await ClientTypeModel.deleteOne({ name: 'TestLLP' });
     await ClientTypeModel.deleteOne({ name: 'TestLLPEdit' });
@@ -143,7 +143,7 @@ async function testMasters() {
     {
       // Create a temporary client linked to "TestLLPEdit" clientType
       const client = await Client.create({
-        clientId: 'C999',
+        clientId: 'C002',
         clientName: 'Temp Test Client LLC',
         phoneNumber: '9999999999',
         clientType: 'TestLLPEdit',

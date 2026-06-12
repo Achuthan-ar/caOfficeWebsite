@@ -45,7 +45,7 @@ const runTests = async () => {
       console.log('No client found. Creating temporary client...');
       clientProfile = await Client.create({
         clientName: 'Test Client Corp',
-        clientId: 'C888',
+        clientId: 'C001',
         phoneNumber: '9999999999',
         clientType: 'Individuals',
         regularityType: 'Regular',
