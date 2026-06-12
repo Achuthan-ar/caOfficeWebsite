@@ -13,6 +13,6 @@ const router = express.Router();
 router.get('/:category', protect, authorize('Admin', 'CA Login', 'Manager', 'Employee'), getMasterList);
 router.post('/:category', protect, authorize('Admin', 'CA Login', 'Manager'), createMasterEntry);
 router.put('/:category/:id', protect, authorize('Admin', 'CA Login', 'Manager'), updateMasterEntry);
-router.delete('/:category/:id', protect, authorize('Admin', 'CA Login'), deleteMasterEntry);
+router.delete('/:category/:id', protect, authorize('Admin', 'CA Login', 'Manager'), deleteMasterEntry);
 
 export default router;

@@ -1,6 +1,20 @@
 import { getMasterModel } from '../models/masterModels.js';
 import Client from '../models/Client.js';
 import AuditLog from '../models/AuditLog.js';
+import Role from '../models/Role.js';
+
+// Resolve role name dynamically, handling case where user.role is not populated
+const getUserRole = async (user) => {
+  if (!user) return null;
+  if (user.role && typeof user.role === 'object' && user.role.name) {
+    return user.role.name;
+  }
+  if (user.role) {
+    const roleDoc = await Role.findById(user.role);
+    return roleDoc?.name || null;
+  }
+  return null;
+};
 
 // Resolve model based on route parameter
 const getModel = (req, res) => {
@@ -108,6 +122,7 @@ export const createMasterEntry = async (req, res) => {
   if (!Model) return;
 
   const { category } = req.params;
+  const userRole = await getUserRole(req.user);
 
   if (category.toLowerCase() === 'accountants') {
     const { associate_name, email, phone_number, status } = req.body;
@@ -146,7 +161,7 @@ export const createMasterEntry = async (req, res) => {
       await AuditLog.create({
         user: req.user._id,
         userName: req.user.name,
-        userRole: req.user.role.name,
+        userRole: userRole || 'unknown',
         action: 'Master Record Created',
         details: `Created associate "${associate_name}" in category "${category}".`,
         ipAddress: req.ip || 'unknown',
@@ -189,7 +204,7 @@ export const createMasterEntry = async (req, res) => {
     await AuditLog.create({
       user: req.user._id,
       userName: req.user.name,
-      userRole: req.user.role.name,
+      userRole: userRole || 'unknown',
       action: 'Master Record Created',
       details: `Created master entry "${name}" in category "${category}". New Value: Name: "${name}", Status: "${status || 'Active'}", Description: "${description || ''}".`,
       ipAddress: req.ip || 'unknown',
@@ -214,6 +229,7 @@ export const updateMasterEntry = async (req, res) => {
   if (!Model) return;
 
   const { category } = req.params;
+  const userRole = await getUserRole(req.user);
 
   if (category.toLowerCase() === 'accountants') {
     const { associate_name, email, phone_number, status } = req.body;
@@ -248,7 +264,7 @@ export const updateMasterEntry = async (req, res) => {
       await AuditLog.create({
         user: req.user._id,
         userName: req.user.name,
-        userRole: req.user.role.name,
+        userRole: userRole || 'unknown',
         action: oldStatus !== status && status !== undefined ? 'Master Status Changed' : 'Master Record Updated',
         details: `Updated associate "${oldName}" in "${category}". New Value: [Name: "${record.associate_name}", Status: "${record.status}", Email: "${record.email}", Phone: "${record.phone_number}"].`,
         ipAddress: req.ip || 'unknown',
@@ -302,7 +318,7 @@ export const updateMasterEntry = async (req, res) => {
     await AuditLog.create({
       user: req.user._id,
       userName: req.user.name,
-      userRole: req.user.role.name,
+      userRole: userRole || 'unknown',
       action,
       details: `${action} for "${oldName}" in "${category}". Old Value: [Name: "${oldName}", Status: "${oldStatus}", Desc: "${oldDescription}"]. New Value: [Name: "${record.name}", Status: "${record.status}", Desc: "${record.description}"].`,
       ipAddress: req.ip || 'unknown',
@@ -334,10 +350,10 @@ export const deleteMasterEntry = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Master record not found' });
     }
 
-    // Role-based protection: TL and Employee cannot delete
-    const userRole = req.user.role.name;
-    if (userRole !== 'Admin' && userRole !== 'Manager') {
-      return res.status(403).json({ success: false, message: 'Not authorized to delete master records. Only Managers and Admins are allowed.' });
+    // Role-based protection: Admin, CA Login, and Manager can delete
+    const userRole = await getUserRole(req.user);
+    if (userRole !== 'Admin' && userRole !== 'CA Login' && userRole !== 'Manager') {
+      return res.status(403).json({ success: false, message: 'Not authorized to delete master records.' });
     }
 
     // Check Client Dependencies (Delete Rules)
@@ -356,7 +372,7 @@ export const deleteMasterEntry = async (req, res) => {
     await AuditLog.create({
       user: req.user._id,
       userName: req.user.name,
-      userRole: req.user.role.name,
+      userRole: userRole || 'unknown',
       action: 'Master Record Deleted',
       details: `Deleted master entry "${recordName}" in category "${category}". Old Value: Name: "${recordName}".`,
       ipAddress: req.ip || 'unknown',
