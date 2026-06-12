@@ -230,7 +230,7 @@ export const getAllBlogsAdmin = async (req, res) => {
     const filter = {};
     
     // Team Lead role can only review/edit their own blog posts
-    if (req.user.role.name === 'TL') {
+    if (req.user.role.name === 'Manager') {
       filter.author = req.user._id;
     }
 
@@ -304,7 +304,7 @@ export const updateBlog = async (req, res) => {
     }
 
     // Role checks: Team Leads (TL) can only update their own blog entries
-    if (req.user.role.name === 'TL' && blog.author.toString() !== req.user._id.toString()) {
+    if (req.user.role.name === 'Manager' && blog.author.toString() !== req.user._id.toString()) {
       return res.status(403).json({ success: false, message: 'Not authorized to edit other team members posts' });
     }
 
@@ -349,7 +349,7 @@ export const deleteBlog = async (req, res) => {
     }
 
     // Role checks: Team Leads can only delete their own posts
-    if (req.user.role.name === 'TL' && blog.author.toString() !== req.user._id.toString()) {
+    if (req.user.role.name === 'Manager' && blog.author.toString() !== req.user._id.toString()) {
       return res.status(403).json({ success: false, message: 'Not authorized to delete other team members posts' });
     }
 
@@ -384,7 +384,7 @@ export const archiveBlog = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Blog post not found' });
     }
 
-    if (req.user.role.name === 'TL' && blog.author.toString() !== req.user._id.toString()) {
+    if (req.user.role.name === 'Manager' && blog.author.toString() !== req.user._id.toString()) {
       return res.status(403).json({ success: false, message: 'Not authorized to archive other team members posts' });
     }
 
@@ -417,7 +417,7 @@ export const restoreBlog = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Blog post not found' });
     }
 
-    if (req.user.role.name === 'TL' && blog.author.toString() !== req.user._id.toString()) {
+    if (req.user.role.name === 'Manager' && blog.author.toString() !== req.user._id.toString()) {
       return res.status(403).json({ success: false, message: 'Not authorized to restore other team members posts' });
     }
 

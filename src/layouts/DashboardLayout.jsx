@@ -114,97 +114,103 @@ const DashboardLayout = () => {
       title: 'Attendance Tracker',
       path: '/attendance',
       icon: Clock,
-      roles: ['Admin', 'Manager', 'TL', 'Employee', 'Intern'],
+      roles: ['Admin', 'CA Login', 'Manager', 'Employee', 'Intern'],
     },
     {
       title: 'Dashboard',
       path: '/dashboard',
       icon: LayoutDashboard,
-      roles: ['Admin', 'Manager', 'TL', 'Employee', 'Intern', 'Client'],
+      roles: ['Admin', 'CA Login', 'Manager', 'Employee', 'Intern', 'Client'],
+    },
+    {
+      title: 'Client Master',
+      path: '/clients',
+      icon: Users,
+      roles: ['Admin', 'CA Login', 'Manager', 'Employee'],
     },
     {
       title: 'Document Center',
       path: '/document-center',
       icon: Folder,
-      roles: ['Admin', 'Manager', 'TL', 'Employee', 'Intern', 'Client'],
+      roles: ['Admin', 'CA Login', 'Manager', 'Employee', 'Intern', 'Client'],
     },
     {
       title: 'Document Requests',
       path: '/document-requests',
       icon: FileText,
-      roles: ['Admin', 'Manager', 'TL', 'Employee'],
+      roles: ['Admin', 'CA Login', 'Manager', 'Employee'],
     },
     {
       title: 'Pending Reviews',
       path: '/pending-documents',
       icon: Briefcase,
-      roles: ['Admin', 'Manager', 'TL', 'Employee'],
+      roles: ['Admin', 'CA Login', 'Manager', 'Employee'],
     },
     {
       title: 'Task Board',
       path: '/tasks',
       icon: FolderKanban,
-      roles: ['Admin', 'Manager', 'TL', 'Employee', 'Intern', 'Client'],
+      roles: ['Admin', 'CA Login', 'Manager', 'Employee', 'Intern'],
     },
     {
       title: 'Compliance Calendar',
       path: '/compliance-calendar',
       icon: Calendar,
-      roles: ['Admin', 'Manager', 'TL', 'Employee', 'Intern', 'Client'],
+      roles: ['Admin', 'CA Login', 'Manager', 'Employee', 'Intern', 'Client'],
     },
     {
       title: 'Billing & Invoices',
       path: '/billing-invoices',
       icon: Receipt,
-      roles: ['Admin', 'Manager', 'Client'],
+      roles: ['Admin', 'CA Login', 'Client'],
     },
     {
       title: 'Support Tickets',
       path: '/service-requests',
       icon: MessageSquare,
-      roles: ['Admin', 'Manager', 'TL', 'Employee', 'Client'],
+      roles: ['Admin', 'CA Login', 'Manager', 'Employee', 'Client'],
     },
     {
       title: 'Reports & Analytics',
       path: '/reports-analytics',
       icon: BarChart2,
-      roles: ['Admin', 'Manager', 'TL'],
+      roles: ['Admin', 'CA Login', 'Manager'],
     },
     {
       title: 'Leave Request',
       path: '/leaves',
       icon: Coffee,
-      roles: ['Admin', 'Manager', 'TL', 'Employee', 'Intern'],
+      roles: ['Admin', 'CA Login', 'Manager', 'Employee', 'Intern'],
     },
     {
       title: 'Employee Directory',
       path: '/employees',
       icon: Users,
-      roles: ['Admin', 'Manager'],
+      roles: ['Admin', 'CA Login'],
     },
     {
       title: 'Monthly Worksheet',
       path: '/attendance-report',
       icon: FileText,
-      roles: ['Admin', 'Manager'],
+      roles: ['Admin', 'CA Login'],
     },
     {
       title: 'Blog Management',
       path: '/blog-admin',
       icon: FileText,
-      roles: ['Admin', 'Manager', 'TL'],
+      roles: ['Admin', 'CA Login', 'Manager'],
     },
     {
-      title: 'App Reviews',
+      title: 'Hiring Requests',
       path: '/applications',
       icon: Briefcase,
-      roles: ['Admin', 'Manager'],
+      roles: ['Admin', 'CA Login'],
     },
     {
       title: 'Mentor Space',
       path: '/mentor-workspace',
       icon: Users,
-      roles: ['TL', 'Employee', 'Admin', 'Manager'],
+      roles: ['Manager', 'Employee', 'Admin', 'CA Login'],
     },
     {
       title: 'Intern Dashboard',
@@ -216,7 +222,7 @@ const DashboardLayout = () => {
       title: 'Work Reports',
       path: '/monthly-reports',
       icon: BarChart2,
-      roles: ['Admin', 'Manager', 'TL', 'Employee'],
+      roles: ['Admin', 'CA Login', 'Manager', 'Employee'],
     },
     {
       title: 'Manage Users',
@@ -225,17 +231,23 @@ const DashboardLayout = () => {
       roles: ['Admin'],
     },
     {
+      title: 'Master Lists',
+      path: '/settings/masters',
+      icon: Settings,
+      roles: ['Admin', 'CA Login', 'Manager', 'Employee'],
+    },
+    {
       title: 'Profile Settings',
       path: '/profile-settings',
       icon: Settings,
-      roles: ['Admin', 'Manager', 'TL', 'Employee', 'Intern', 'Client'],
+      roles: ['Admin', 'CA Login', 'Manager', 'Employee', 'Intern', 'Client'],
     },
   ];
 
   const roleColors = {
     Admin: 'bg-red-500/10 text-red-500 border border-red-500/20',
-    Manager: 'bg-amber-500/10 text-amber-500 border border-amber-500/20',
-    TL: 'bg-indigo-500/10 text-indigo-500 border border-indigo-500/20',
+    'CA Login': 'bg-amber-500/10 text-amber-500 border border-amber-500/20',
+    Manager: 'bg-indigo-500/10 text-indigo-500 border border-indigo-500/20',
     Employee: 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20',
     Intern: 'bg-sky-500/10 text-sky-500 border border-sky-500/20',
     Client: 'bg-purple-500/10 text-purple-500 border border-purple-500/20',
@@ -340,16 +352,20 @@ const DashboardLayout = () => {
               {location.pathname === '/users' ? 'Role Management' :
                location.pathname === '/attendance' ? 'Attendance Tracker' :
                location.pathname === '/employees' ? 'Employee Registry' :
+               location.pathname === '/clients' ? 'Client Master Registry' :
+               location.pathname === '/clients/new' || location.pathname.startsWith('/clients/edit/') ? 'Client Editor' :
+               location.pathname.includes('/clients/') ? 'Client Profile Overview' :
                location.pathname === '/employee-form' || location.pathname.startsWith('/employee-form/') ? 'Employee Profile' :
                location.pathname === '/attendance-report' ? 'Attendance Worksheet' :
                location.pathname === '/leaves' ? 'Leave Management' :
                location.pathname === '/tasks' ? 'Compliance Task Board' :
                location.pathname === '/task-form' || location.pathname.startsWith('/task-form/') ? 'Task Editor' :
-               location.pathname === '/applications' ? 'Applicant Review Registry' :
+               location.pathname === '/applications' ? 'Hiring Requests' :
                location.pathname === '/mentor-workspace' ? 'Coaching Workspace' :
                location.pathname === '/intern-portal' ? 'Intern Learning Dashboard' :
                location.pathname.startsWith('/certificate/') ? 'Training Completion Certificate' :
                location.pathname === '/client-dashboard' ? 'Client Compliance Center' :
+               location.pathname === '/settings/masters' ? 'Master Lists Settings' :
                location.pathname === '/monthly-reports' ? 'Performance Evaluation Reports' :
                'Dashboard Overview'}
             </h1>

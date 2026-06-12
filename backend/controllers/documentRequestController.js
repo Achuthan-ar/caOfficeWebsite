@@ -317,7 +317,7 @@ export const uploadRequestDocument = async (req, res) => {
       title: 'Document Uploaded by Client',
       message: `${request.client.companyName} uploaded file for request: "${request.documentName}".`,
       type: 'Document',
-      link: '/applications', // reviews center
+      link: '/document-requests', // reviews center
     });
 
     // Log Audit Event
@@ -520,7 +520,7 @@ export const runRemindersCheck = async (req, res) => {
               title: 'ALERT: Document Request Escalated',
               message: `Client ${request.client.companyName} failed to upload document "${request.documentName}" after 3 reminders.`,
               type: 'Document',
-              link: '/applications', // dashboard portal review
+              link: '/document-requests', // dashboard portal review
             });
           }
 
@@ -581,6 +581,6 @@ export const runRemindersCheck = async (req, res) => {
 
 // Helper: Resolve Admin, Manager, and TL roles for notification broadcasts
 const getStaffReviewerRoles = async () => {
-  const roles = await Role.find({ name: { $in: ['Admin', 'Manager', 'TL'] } });
+  const roles = await Role.find({ name: { $in: ['Admin', 'CA Login', 'Manager'] } });
   return roles.map(r => r._id);
 };

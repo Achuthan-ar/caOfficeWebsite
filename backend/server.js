@@ -28,9 +28,11 @@ import documentRequestRoutes from './routes/documentRequestRoutes.js';
 import invoiceRoutes from './routes/invoiceRoutes.js';
 import ticketRoutes from './routes/ticketRoutes.js';
 import complianceRoutes from './routes/complianceRoutes.js';
+import masterRoutes from './routes/masterRoutes.js';
 import path from 'path';
 import http from 'http';
 import { initSocket } from './services/socketService.js';
+import { checkAndUpdateOverdueTasks } from './utils/overdueHelper.js';
 
 // Load environment variables
 dotenv.config();
@@ -140,6 +142,7 @@ app.use('/api/document-requests', documentRequestRoutes);
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/tickets', ticketRoutes);
 app.use('/api/compliance', complianceRoutes);
+app.use('/api/masters', masterRoutes);
 
 // Serve uploads directory as a static folder for local storage uploads fallback
 app.use('/uploads', express.static(path.resolve('uploads')));
@@ -208,4 +211,10 @@ initSocket(server);
 
 server.listen(PORT, () => {
   console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+  
+  // Trigger overdue task check on server start
+  checkAndUpdateOverdueTasks();
+  
+  // Run overdue task check every 1 hour (3600000 ms)
+  setInterval(checkAndUpdateOverdueTasks, 3600000);
 });

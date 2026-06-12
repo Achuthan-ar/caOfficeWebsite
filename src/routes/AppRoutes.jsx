@@ -50,6 +50,11 @@ const CertificateView = lazy(() => import('../pages/dashboard/CertificateView'))
 const ClientDashboard = lazy(() => import('../pages/dashboard/ClientDashboard'));
 const MonthlyReports = lazy(() => import('../pages/dashboard/MonthlyReports'));
 
+const ClientList = lazy(() => import('../pages/dashboard/ClientList'));
+const ClientForm = lazy(() => import('../pages/dashboard/ClientForm'));
+const ClientProfile = lazy(() => import('../pages/dashboard/ClientProfile'));
+const MasterSettings = lazy(() => import('../pages/dashboard/MasterSettings'));
+
 const DocumentCenter = lazy(() => import('../pages/dashboard/DocumentCenter'));
 const DocumentRequests = lazy(() => import('../pages/dashboard/DocumentRequests'));
 const PendingDocuments = lazy(() => import('../pages/dashboard/PendingDocuments'));
@@ -90,16 +95,16 @@ const AppRoutes = () => {
             <Route element={<DashboardLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/unauthorized" element={<Unauthorized />} />
-              
-              {/* All staff roles can record attendance & review their calendar */}
-              <Route path="/attendance" element={<AttendanceClock />} />
 
-              {/* Leave Management & Tasks (accessible to all authenticated staff roles) */}
-              <Route path="/leaves" element={<LeaveManager />} />
-              <Route path="/tasks" element={<TaskTracker />} />
-              <Route path="/intern-portal" element={<InternPortal />} />
-              <Route path="/certificate/:id" element={<CertificateView />} />
-              
+              {/* Staff and Intern only pages */}
+              <Route element={<ProtectedRoute allowedRoles={['Admin', 'CA Login', 'Manager', 'Employee', 'Intern']} />}>
+                <Route path="/attendance" element={<AttendanceClock />} />
+                <Route path="/leaves" element={<LeaveManager />} />
+                <Route path="/tasks" element={<TaskTracker />} />
+                <Route path="/intern-portal" element={<InternPortal />} />
+                <Route path="/certificate/:id" element={<CertificateView />} />
+              </Route>
+
               {/* Shared Document Center, Compliance, Tickets, Profile & Notifications (accessible to all authenticated roles) */}
               <Route path="/document-center" element={<DocumentCenter />} />
               <Route path="/compliance-calendar" element={<ComplianceCalendar />} />
@@ -108,54 +113,59 @@ const AppRoutes = () => {
               <Route path="/profile-settings" element={<ProfileSettings />} />
 
               {/* Document Request & Pending Upload Review (accessible to all staff roles) */}
-              <Route element={<ProtectedRoute allowedRoles={['Admin', 'Manager', 'TL', 'Employee']} />}>
+              <Route element={<ProtectedRoute allowedRoles={['Admin', 'CA Login', 'Manager', 'Employee']} />}> 
                 <Route path="/document-requests" element={<DocumentRequests />} />
                 <Route path="/pending-documents" element={<PendingDocuments />} />
+                <Route path="/clients" element={<ClientList />} />
+                <Route path="/clients/new" element={<ClientForm />} />
+                <Route path="/clients/edit/:id" element={<ClientForm />} />
+                <Route path="/clients/:id" element={<ClientProfile />} />
+                <Route path="/settings/masters" element={<MasterSettings />} />
               </Route>
 
-              {/* Invoices (accessible to Admin, Manager, and Client roles) */}
-              <Route element={<ProtectedRoute allowedRoles={['Admin', 'Manager', 'Client']} />}>
+              {/* Invoices (accessible to Admin, CA Login, and Client roles) */}
+              <Route element={<ProtectedRoute allowedRoles={['Admin', 'CA Login', 'Client']} />}> 
                 <Route path="/billing-invoices" element={<BillingInvoices />} />
               </Route>
 
-              {/* Reports & Analytics (accessible to Admin, Manager, and Team Lead roles) */}
-              <Route element={<ProtectedRoute allowedRoles={['Admin', 'Manager', 'TL']} />}>
+              {/* Reports & Analytics (accessible to Admin, CA Login, and Manager roles) */}
+              <Route element={<ProtectedRoute allowedRoles={['Admin', 'CA Login', 'Manager']} />}> 
                 <Route path="/reports-analytics" element={<ReportsAnalytics />} />
               </Route>
-              
-              {/* Create/Edit Task - Manager and TL only */}
-              <Route element={<ProtectedRoute allowedRoles={['Manager', 'TL']} />}>
+
+              {/* Create/Edit Task - CA Login and Manager only */}
+              <Route element={<ProtectedRoute allowedRoles={['CA Login', 'Manager']} />}> 
                 <Route path="/task-form" element={<TaskForm />} />
                 <Route path="/task-form/:id" element={<TaskForm />} />
               </Route>
 
-              {/* Mentor Workspace & Performance Reports - Manager, TL, and Employee only */}
-              <Route element={<ProtectedRoute allowedRoles={['Manager', 'TL', 'Employee']} />}>
+              {/* Mentor Workspace & Performance Reports - CA Login, Manager, and Employee only */}
+              <Route element={<ProtectedRoute allowedRoles={['CA Login', 'Manager', 'Employee']} />}> 
                 <Route path="/mentor-workspace" element={<MentorWorkspace />} />
                 <Route path="/monthly-reports" element={<MonthlyReports />} />
               </Route>
 
               {/* Client Only Pages */}
-              <Route element={<ProtectedRoute allowedRoles={['Client']} />}>
+              <Route element={<ProtectedRoute allowedRoles={['Client']} />}> 
                 <Route path="/client-dashboard" element={<ClientDashboard />} />
               </Route>
-              
-              {/* Admin and Manager only pages */}
-              <Route element={<ProtectedRoute allowedRoles={['Admin', 'Manager']} />}>
+
+              {/* Admin and CA Login only pages */}
+              <Route element={<ProtectedRoute allowedRoles={['Admin', 'CA Login']} />}> 
                 <Route path="/employees" element={<EmployeeList />} />
                 <Route path="/employee-form" element={<EmployeeForm />} />
                 <Route path="/employee-form/:id" element={<EmployeeForm />} />
                 <Route path="/attendance-report" element={<AttendanceReport />} />
                 <Route path="/applications" element={<ApplicationReviews />} />
               </Route>
-              
+
               {/* Admin-Only User Role Management Page */}
-              <Route element={<ProtectedRoute allowedRoles={['Admin']} />}>
+              <Route element={<ProtectedRoute allowedRoles={['Admin']} />}> 
                 <Route path="/users" element={<UsersList />} />
               </Route>
 
               {/* Secure Blog Administration Pages (Admin, Manager, Team Lead only) */}
-              <Route element={<ProtectedRoute allowedRoles={['Admin', 'Manager', 'TL']} />}>
+              <Route element={<ProtectedRoute allowedRoles={['Admin', 'CA Login', 'Manager']} />}> 
                 <Route path="/blog-admin" element={<BlogManagement />} />
                 <Route path="/blog-form" element={<BlogForm />} />
                 <Route path="/blog-form/:id" element={<BlogForm />} />

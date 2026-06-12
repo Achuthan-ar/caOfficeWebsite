@@ -9,9 +9,9 @@ import { protect, authorize } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/', protect, authorize('Admin', 'Manager', 'TL'), getEmployees);
-router.post('/', protect, authorize('Admin', 'Manager'), createEmployee);
-router.put('/:id', protect, authorize('Admin', 'Manager'), updateEmployee);
+router.get('/', protect, authorize('Admin', 'CA Login', 'Manager'), getEmployees);
+router.post('/', protect, authorize('Admin', 'CA Login'), createEmployee);
+router.put('/:id', protect, authorize('Admin', 'CA Login'), updateEmployee);
 router.delete('/:id', protect, authorize('Admin'), deleteEmployee);
 
 export default router;

@@ -44,9 +44,9 @@ const ApplicationReviews = () => {
       }
       
       if (employeesRes.data?.success) {
-        // Mentors should be Team Leads (TL), Employees, or Managers
+        // Mentors should be Managers, Employees, or CA Logins
         const potentialMentors = employeesRes.data.data.filter(emp => 
-          ['TL', 'Employee', 'Manager'].includes(emp.role?.name)
+          ['Manager', 'Employee', 'CA Login'].includes(emp.role?.name)
         );
         setMentors(potentialMentors);
       }
@@ -89,7 +89,7 @@ const ApplicationReviews = () => {
       return;
     }
     if (statusToUpdate === 'Approved' && !selectedMentor) {
-      setUpdateError('Please allocate a Mentor (TL or Employee) for this internship.');
+      setUpdateError('Please allocate a Mentor (Manager or Employee) for this internship.');
       setUpdateLoading(false);
       return;
     }
@@ -386,7 +386,7 @@ const ApplicationReviews = () => {
                 <>
                   <div>
                     <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                      Assign Mentor (Team Lead / Coach) *
+                      Assign Mentor (Manager / Coach) *
                     </label>
                     <select
                       required

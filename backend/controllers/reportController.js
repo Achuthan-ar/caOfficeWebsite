@@ -22,7 +22,7 @@ const getWeekdaysCount = (monthStr) => {
 
 // @desc    Generate and save employee Monthly Report
 // @route   POST /api/reports/generate
-// @access  Private (Manager, Admin)
+// @access  Private (CA Login, Admin)
 export const generateMonthlyReport = async (req, res) => {
   const { employeeId, month } = req.body; // month format: "YYYY-MM"
 
@@ -120,7 +120,7 @@ export const generateMonthlyReport = async (req, res) => {
 
 // @desc    Get monthly reports history
 // @route   GET /api/reports
-// @access  Private (Employee, TL, Manager, Admin)
+// @access  Private (Employee, Manager, CA Login, Admin)
 export const getMonthlyReports = async (req, res) => {
   const { employeeId, month, department } = req.query;
 
@@ -128,8 +128,8 @@ export const getMonthlyReports = async (req, res) => {
     let query = {};
 
     // Restriction filters: Non-Admin/Managers can only see their own reports (unless TL viewing department reports)
-    if (!['Admin', 'Manager'].includes(req.user.role.name)) {
-      if (req.user.role.name === 'TL') {
+    if (!['Admin', 'CA Login'].includes(req.user.role.name)) {
+      if (req.user.role.name === 'Manager') {
         // TL can view reports of employees in their department
         if (department) {
           query.department = department;
@@ -149,7 +149,7 @@ export const getMonthlyReports = async (req, res) => {
         query.employee = req.user._id;
       }
     } else {
-      // Admin and Managers can filter by target employee
+      // Admin and CA Logins can filter by target employee
       if (employeeId) {
         query.employee = employeeId;
       }
@@ -183,7 +183,7 @@ export const getMonthlyReports = async (req, res) => {
 
 // @desc    Get comparative team performance statistics grouped by Department
 // @route   GET /api/reports/teams
-// @access  Private (TL, Manager, Admin)
+// @access  Private (Manager, CA Login, Admin)
 export const getTeamPerformance = async (req, res) => {
   const { month } = req.query;
   
@@ -236,7 +236,7 @@ export const getTeamPerformance = async (req, res) => {
 
 // @desc    Get active reports statistics (total counts, averages)
 // @route   GET /api/reports/analytics
-// @access  Private (Manager, Admin)
+// @access  Private (CA Login, Admin)
 export const getReportAnalytics = async (req, res) => {
   const { month } = req.query;
 

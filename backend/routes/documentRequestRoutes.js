@@ -11,11 +11,11 @@ import { protect, authorize } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.post('/', protect, authorize('Admin', 'Manager', 'TL', 'Employee'), createRequest);
-router.post('/template', protect, authorize('Admin', 'Manager', 'TL', 'Employee'), createRequestFromTemplate);
+router.post('/', protect, authorize('Admin', 'CA Login', 'Manager', 'Employee'), createRequest);
+router.post('/template', protect, authorize('Admin', 'CA Login', 'Manager', 'Employee'), createRequestFromTemplate);
 router.get('/', protect, getRequests);
 router.put('/:id/upload', protect, uploadRequestDocument);
-router.put('/:id/review', protect, authorize('Admin', 'Manager', 'TL', 'Employee'), reviewRequest);
-router.post('/run-reminders', protect, authorize('Admin', 'Manager', 'TL'), runRemindersCheck);
+router.put('/:id/review', protect, authorize('Admin', 'CA Login', 'Manager', 'Employee'), reviewRequest);
+router.post('/run-reminders', protect, authorize('Admin', 'CA Login', 'Manager'), runRemindersCheck);
 
 export default router;

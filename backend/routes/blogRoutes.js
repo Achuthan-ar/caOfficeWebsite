@@ -33,11 +33,11 @@ router.post('/post/:slug/comments', protect, createBlogComment); // Any logged-i
 // ============================================================================
 // SECURE ADMIN/MANAGER/TL DASHBOARD ROUTES
 // ============================================================================
-router.get('/admin', protect, authorize('Admin', 'Manager', 'TL'), getAllBlogsAdmin);
-router.post('/admin', protect, authorize('Admin', 'Manager', 'TL'), validateSchema(blogSchema), createBlog);
-router.put('/admin/:id', protect, authorize('Admin', 'Manager', 'TL'), updateBlog);
-router.delete('/admin/:id', protect, authorize('Admin', 'Manager', 'TL'), deleteBlog);
-router.put('/admin/:id/archive', protect, authorize('Admin', 'Manager', 'TL'), archiveBlog);
-router.put('/admin/:id/restore', protect, authorize('Admin', 'Manager', 'TL'), restoreBlog);
+router.get('/admin', protect, authorize('Admin', 'CA Login', 'Manager'), getAllBlogsAdmin);
+router.post('/admin', protect, authorize('Admin', 'CA Login', 'Manager'), validateSchema(blogSchema), createBlog);
+router.put('/admin/:id', protect, authorize('Admin', 'CA Login', 'Manager'), updateBlog);
+router.delete('/admin/:id', protect, authorize('Admin', 'CA Login', 'Manager'), deleteBlog);
+router.put('/admin/:id/archive', protect, authorize('Admin', 'CA Login', 'Manager'), archiveBlog);
+router.put('/admin/:id/restore', protect, authorize('Admin', 'CA Login', 'Manager'), restoreBlog);
 
 export default router;

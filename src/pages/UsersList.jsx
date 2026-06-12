@@ -19,7 +19,12 @@ import {
   Briefcase,
   UserCheck,
   X,
-  Key
+  Key,
+  Eye,
+  FileText,
+  ExternalLink,
+  Download,
+  Info
 } from 'lucide-react';
 
 const UsersList = () => {
@@ -51,6 +56,15 @@ const UsersList = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [passwordSubmitting, setPasswordSubmitting] = useState(false);
+
+  // Client Profile Modal States
+  const [selectedClientForProfile, setSelectedClientForProfile] = useState(null);
+  const [showClientProfileModal, setShowClientProfileModal] = useState(false);
+  const [clientProfileTasks, setClientProfileTasks] = useState([]);
+  const [clientProfileTasksLoading, setClientProfileTasksLoading] = useState(false);
+  const [clientProfileDocs, setClientProfileDocs] = useState([]);
+  const [clientProfileDocsLoading, setClientProfileDocsLoading] = useState(false);
+  const [clientProfileTab, setClientProfileTab] = useState('filings'); // 'filings' | 'documents' | 'tasks'
 
   // Form Hooks
   const { register: regStaff, handleSubmit: submitStaff, reset: resetStaff, formState: { errors: errorsStaff } } = useForm();
@@ -105,6 +119,31 @@ const UsersList = () => {
     fetchClients();
     fetchDepartments();
   }, []);
+
+  const handleViewClientProfile = async (client) => {
+    setSelectedClientForProfile(client);
+    setShowClientProfileModal(true);
+    setClientProfileTab('filings');
+    setClientProfileTasksLoading(true);
+    setClientProfileDocsLoading(true);
+    try {
+      const [tasksRes, docsRes] = await Promise.all([
+        api.get(`/tasks?clientId=${client._id}`),
+        api.get(`/clients/documents?clientId=${client._id}`),
+      ]);
+      if (tasksRes.data?.success) {
+        setClientProfileTasks(tasksRes.data.data);
+      }
+      if (docsRes.data?.success) {
+        setClientProfileDocs(docsRes.data.data);
+      }
+    } catch (err) {
+      console.error('Error fetching client profile dependencies:', err.message);
+    } finally {
+      setClientProfileTasksLoading(false);
+      setClientProfileDocsLoading(false);
+    }
+  };
 
   const handleRoleChange = async (userId, newRole) => {
     setActionLoading(userId);
@@ -271,7 +310,7 @@ const UsersList = () => {
 
   // Lists filtering by active tab & search query
   const filteredStaff = users.filter((u) => {
-    const isStaff = ['Admin', 'Manager', 'TL', 'Employee'].includes(u.role?.name);
+    const isStaff = ['Admin', 'CA Login', 'Manager', 'Employee'].includes(u.role?.name);
     if (!isStaff) return false;
     
     if (!searchQuery) return true;
@@ -315,7 +354,7 @@ const UsersList = () => {
     }).format(val || 0);
   };
 
-  const roleOptions = ['Manager', 'TL', 'Employee'];
+  const roleOptions = ['CA Login', 'Manager', 'Employee'];
 
   return (
     <div className="space-y-6">
@@ -648,8 +687,8 @@ const UsersList = () => {
                               >
                                 <option value="Intern">Intern</option>
                                 <option value="Employee">Promote to Employee</option>
-                                <option value="TL">Promote to TL</option>
                                 <option value="Manager">Promote to Manager</option>
+                                <option value="CA Login">Promote to CA Login</option>
                                 <option value="Client">Demote to Client</option>
                               </select>
                             </div>
@@ -783,20 +822,29 @@ const UsersList = () => {
 
                           {/* Actions */}
                           <td className="py-4 px-4 text-right">
-                            {item.user?._id && (
+                            <div className="flex justify-end gap-1.5">
                               <button
-                                onClick={() => handleDeleteUser(item.user._id, 'Client')}
-                                disabled={isUpdating}
-                                className="rounded-lg p-2 text-rose-500 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/25 disabled:opacity-50 cursor-pointer active:scale-[0.95] transition"
-                                title="Delete Client Account"
+                                onClick={() => handleViewClientProfile(item)}
+                                className="rounded-lg p-2 text-indigo-500 hover:bg-indigo-500/10 border border-transparent hover:border-indigo-500/25 cursor-pointer active:scale-[0.95] transition"
+                                title="View Client Profile"
                               >
-                                {isUpdating ? (
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                  <Trash2 className="h-4 w-4" />
-                                )}
+                                <Eye className="h-4 w-4" />
                               </button>
-                            )}
+                              {item.user?._id && (
+                                <button
+                                  onClick={() => handleDeleteUser(item.user._id, 'Client')}
+                                  disabled={isUpdating}
+                                  className="rounded-lg p-2 text-rose-500 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/25 disabled:opacity-50 cursor-pointer active:scale-[0.95] transition"
+                                  title="Delete Client Account"
+                                >
+                                  {isUpdating ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Trash2 className="h-4 w-4" />
+                                  )}
+                                </button>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       );
@@ -911,8 +959,8 @@ const UsersList = () => {
                   className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 text-slate-800 dark:text-white focus:outline-none cursor-pointer"
                 >
                   <option value="Employee">Employee</option>
-                  <option value="TL">Team Leader</option>
                   <option value="Manager">Manager</option>
+                  <option value="CA Login">CA Login</option>
                 </select>
               </div>
 
@@ -1331,6 +1379,228 @@ const UsersList = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ================== MODAL: VIEW CLIENT PROFILE (SLIDE OVER) ================== */}
+      {showClientProfileModal && selectedClientForProfile && (
+        <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/60 backdrop-blur-xs text-left">
+          <div className="w-full max-w-2xl bg-white dark:bg-slate-950 border-l border-slate-200 dark:border-slate-800 shadow-2xl h-full flex flex-col animate-slide-in overflow-hidden">
+            {/* Header */}
+            <div className="p-6 border-b border-slate-100 dark:border-slate-900 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-wider text-indigo-500 font-bold">Client Master Profile</span>
+                <h3 className="text-lg font-extrabold text-slate-800 dark:text-white font-heading mt-0.5">
+                  {selectedClientForProfile.companyName}
+                </h3>
+              </div>
+              <button 
+                onClick={() => { 
+                  setShowClientProfileModal(false); 
+                  setSelectedClientForProfile(null); 
+                  setClientProfileTasks([]); 
+                  setClientProfileDocs([]); 
+                }} 
+                className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg text-slate-550 transition cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Sub-navigation Tabs */}
+            <div className="flex border-b border-slate-100 dark:border-slate-900 px-6 bg-slate-50/30 dark:bg-slate-900/10">
+              <button
+                onClick={() => setClientProfileTab('filings')}
+                className={`py-3 px-4 text-xs font-bold border-b-2 uppercase tracking-wide transition select-none cursor-pointer ${
+                  clientProfileTab === 'filings'
+                    ? 'border-indigo-500 text-indigo-500'
+                    : 'border-transparent text-slate-400 hover:text-slate-700 dark:hover:text-slate-250'
+                }`}
+              >
+                Filing Status & Works
+              </button>
+              <button
+                onClick={() => setClientProfileTab('documents')}
+                className={`py-3 px-4 text-xs font-bold border-b-2 uppercase tracking-wide transition select-none cursor-pointer ${
+                  clientProfileTab === 'documents'
+                    ? 'border-indigo-500 text-indigo-500'
+                    : 'border-transparent text-slate-400 hover:text-slate-700 dark:hover:text-slate-250'
+                }`}
+              >
+                Documents ({clientProfileDocs.length})
+              </button>
+              <button
+                onClick={() => setClientProfileTab('tasks')}
+                className={`py-3 px-4 text-xs font-bold border-b-2 uppercase tracking-wide transition select-none cursor-pointer ${
+                  clientProfileTab === 'tasks'
+                    ? 'border-indigo-500 text-indigo-500'
+                    : 'border-transparent text-slate-400 hover:text-slate-700 dark:hover:text-slate-250'
+                }`}
+              >
+                Tasks ({clientProfileTasks.length})
+              </button>
+            </div>
+
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              {clientProfileTab === 'filings' && (
+                <div className="space-y-6">
+                  {/* Basic Metadata */}
+                  <div className="grid grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-900/40 p-4 rounded-xl border border-slate-100 dark:border-slate-900 text-xs">
+                    <div>
+                      <span className="text-[10px] text-slate-400 font-bold uppercase block">Client ID</span>
+                      <span className="font-extrabold text-indigo-500">{selectedClientForProfile.clientId}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 font-bold uppercase block">Representative</span>
+                      <span className="font-semibold text-slate-800 dark:text-white">{selectedClientForProfile.user?.name || 'N/A'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 font-bold uppercase block">PAN Number</span>
+                      <span className="font-black text-slate-700 dark:text-slate-350 uppercase">{selectedClientForProfile.panNumber || 'Not provided'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 font-bold uppercase block">GSTIN</span>
+                      <span className="font-black text-slate-700 dark:text-slate-350 uppercase">{selectedClientForProfile.gstin || 'Not provided'}</span>
+                    </div>
+                  </div>
+
+                  {/* Stepper Status Grid */}
+                  <div className="space-y-4">
+                    <h4 className="text-xs font-bold text-slate-455 uppercase tracking-wider">Filing Status Indicators</h4>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-900 p-3 rounded-lg text-center space-y-1">
+                        <span className="text-[9px] text-slate-400 block font-bold uppercase">GST Status</span>
+                        <span className="text-xs font-extrabold text-indigo-500">{selectedClientForProfile.filingStatus?.gstStatus || 'Not Started'}</span>
+                      </div>
+                      <div className="bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-900 p-3 rounded-lg text-center space-y-1">
+                        <span className="text-[9px] text-slate-400 block font-bold uppercase">ITR Status</span>
+                        <span className="text-xs font-extrabold text-indigo-500">{selectedClientForProfile.filingStatus?.itrStatus || 'Not Started'}</span>
+                      </div>
+                      <div className="bg-slate-50 dark:bg-slate-900/40 border border-slate-105 dark:border-slate-900 p-3 rounded-lg text-center space-y-1">
+                        <span className="text-[9px] text-slate-400 block font-bold uppercase">Audit Status</span>
+                        <span className="text-xs font-extrabold text-indigo-500">{selectedClientForProfile.filingStatus?.auditStatus || 'Not Started'}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Pending Works */}
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-bold text-slate-455 uppercase tracking-wider flex items-center gap-1.5">
+                      <Info className="h-4.5 w-4.5 text-indigo-500" />
+                      Pending Works Instructions
+                    </h4>
+                    {(!selectedClientForProfile.pendingWorks || selectedClientForProfile.pendingWorks.length === 0) ? (
+                      <div className="text-xs text-slate-450 italic">No pending items.</div>
+                    ) : (
+                      <ul className="space-y-1.5 text-xs">
+                        {selectedClientForProfile.pendingWorks.map((work, idx) => (
+                          <li key={idx} className="flex gap-2 items-start p-2.5 bg-red-500/[0.02] border border-red-550/10 rounded-lg text-red-500">
+                            <span className="font-semibold">{work}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {clientProfileTab === 'documents' && (
+                <div className="space-y-4">
+                  <h4 className="text-xs font-bold text-slate-450 uppercase tracking-wider">Compliance Documents & Files</h4>
+                  {clientProfileDocsLoading ? (
+                    <div className="text-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin text-indigo-500 mx-auto" />
+                    </div>
+                  ) : clientProfileDocs.length === 0 ? (
+                    <div className="text-center py-12 text-xs text-slate-450 italic border border-dashed border-slate-150 dark:border-slate-800 rounded-xl">
+                      No documents exchanged for this client.
+                    </div>
+                  ) : (
+                    <div className="space-y-3.5">
+                      {clientProfileDocs.map((doc) => (
+                        <div key={doc._id} className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900/60 border border-slate-150 dark:border-slate-900 rounded-xl text-xs">
+                          <div className="space-y-1 min-w-0 flex-1 mr-4">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h5 className="font-bold text-slate-800 dark:text-white truncate max-w-[240px]">{doc.name}</h5>
+                              <span className="rounded bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 px-1.5 py-0.2 text-[8px] font-bold uppercase">
+                                {doc.documentType}
+                              </span>
+                            </div>
+                            <span className="text-[9px] text-slate-400 block">
+                              Uploaded by {doc.uploadedBy?.name || 'Client'} on {new Date(doc.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <div className="flex gap-2">
+                            <a
+                              href={doc.fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-1.5 bg-indigo-500 hover:bg-indigo-650 text-white rounded-lg transition cursor-pointer"
+                              title="Download File"
+                            >
+                              <Download className="h-4 w-4" />
+                            </a>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {clientProfileTab === 'tasks' && (
+                <div className="space-y-4">
+                  <h4 className="text-xs font-bold text-slate-455 uppercase tracking-wider">Compliance Tasks Tracker</h4>
+                  {clientProfileTasksLoading ? (
+                    <div className="text-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin text-indigo-500 mx-auto" />
+                    </div>
+                  ) : clientProfileTasks.length === 0 ? (
+                    <div className="text-center py-12 text-xs text-slate-450 italic border border-dashed border-slate-150 dark:border-slate-800 rounded-xl">
+                      No compliance tasks assigned for this client.
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto border border-slate-200 dark:border-slate-850 rounded-xl shadow-xs">
+                      <table className="w-full text-left border-collapse text-xs">
+                        <thead>
+                          <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 text-slate-450 uppercase font-semibold text-[10px]">
+                            <th className="py-2.5 px-3">Task ID</th>
+                            <th className="py-2.5 px-3">Task Name</th>
+                            <th className="py-2.5 px-3">Assigned To</th>
+                            <th className="py-2.5 px-3">Due Date</th>
+                            <th className="py-2.5 px-3 text-right">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-900 text-slate-700 dark:text-slate-350">
+                          {clientProfileTasks.map((task) => (
+                            <tr key={task._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30">
+                              <td className="py-3 px-3 font-bold text-indigo-500">{task.taskId}</td>
+                              <td className="py-3 px-3 font-bold text-slate-850 dark:text-white">{task.taskName}</td>
+                              <td className="py-3 px-3">{task.assignedTo?.name || 'Unassigned'}</td>
+                              <td className="py-3 px-3 font-semibold text-slate-550">
+                                {new Date(task.dueDate).toLocaleDateString()}
+                              </td>
+                              <td className="py-3 px-3 text-right">
+                                <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+                                  task.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
+                                  task.status === 'In Progress' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
+                                  task.status === 'Overdue' ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20 animate-pulse' :
+                                  'bg-slate-100 text-slate-500 dark:bg-slate-900'
+                                }`}>
+                                  {task.status}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

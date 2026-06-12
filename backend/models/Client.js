@@ -2,21 +2,53 @@ import mongoose from 'mongoose';
 
 const clientSchema = new mongoose.Schema(
   {
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-      unique: true,
-      index: true,
-    },
     clientId: {
       type: String,
       unique: true,
-      sparse: true,
+      required: true,
+      index: true,
     },
-    companyName: {
+    clientName: {
       type: String,
-      required: [true, 'Please provide business name'],
+      required: [true, 'Please provide client name'],
+      trim: true,
+    },
+    fileNumber: {
+      type: String,
+      trim: true,
+    },
+    businessName: {
+      type: String,
+      trim: true,
+    },
+    accountantName: {
+      type: String,
+      trim: true,
+    },
+    clientType: {
+      type: String,
+      required: [true, 'Please provide client type'],
+      trim: true,
+    },
+    caseType: {
+      type: String,
+      trim: true,
+    },
+    dobDof: {
+      type: Date,
+    },
+    phoneNumber: {
+      type: String,
+      required: [true, 'Please provide phone number'],
+      trim: true,
+    },
+    email: {
+      type: String,
+      trim: true,
+      lowercase: true,
+    },
+    whatsappNumber: {
+      type: String,
       trim: true,
     },
     panNumber: {
@@ -24,11 +56,50 @@ const clientSchema = new mongoose.Schema(
       trim: true,
       uppercase: true,
     },
-    gstin: {
+    aadhaarNumber: {
       type: String,
       trim: true,
-      uppercase: true,
     },
+    servicesOpted: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+    address: {
+      type: String,
+      trim: true,
+    },
+    regularityType: {
+      type: String,
+      trim: true,
+    },
+    remarks: {
+      type: String,
+      trim: true,
+    },
+    status: {
+      type: String,
+      enum: ['Active', 'Inactive'],
+      default: 'Active',
+    },
+    assignedTeamLead: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      index: true,
+    },
+    assignedEmployee: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      index: true,
+    },
+    // Keep user reference for backward compatibility with client portal login
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      index: true,
+    },
+    // Keep filing trackers for dashboard compatibility
     filingStatus: {
       gstStatus: {
         type: String,
@@ -54,8 +125,8 @@ const clientSchema = new mongoose.Schema(
     ],
     completedFilings: [
       {
-        filingType: { type: String, required: true }, // e.g. "GSTR-3B", "ITR-6", "Statutory Audit"
-        period: { type: String, required: true }, // e.g. "April 2026", "FY 2025-26"
+        filingType: { type: String, required: true },
+        period: { type: String, required: true },
         filedDate: { type: Date, default: Date.now },
         acknowledgmentNumber: { type: String },
       },

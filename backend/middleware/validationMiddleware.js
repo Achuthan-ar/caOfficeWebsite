@@ -68,6 +68,14 @@ export const validateSchema = (schema) => {
       }
     }
 
+    if (schema.startDate && schema.dueDate && req.body.startDate && req.body.dueDate) {
+      const start = new Date(req.body.startDate);
+      const due = new Date(req.body.dueDate);
+      if (!isNaN(start.getTime()) && !isNaN(due.getTime()) && start > due) {
+        errors.dueDate = 'Due date cannot be before start date.';
+      }
+    }
+
     if (Object.keys(errors).length > 0) {
       return res.status(400).json({
         success: false,
@@ -100,11 +108,23 @@ export const leaveSchema = {
 };
 
 export const taskSchema = {
-  title: { required: true, type: 'string', min: 3, max: 100 },
-  priority: { type: 'string', enum: ['Low', 'Medium', 'High', 'Critical'] },
-  dueDate: { required: true, type: 'date', futureOnly: true },
+  taskName: { required: true, type: 'string', min: 3, max: 100 },
+  financialYear: { type: 'string' },
+  taskDescription: { type: 'string' },
+  clientId: { required: true, type: 'mongoId' },
   assignedTo: { type: 'mongoId' },
-  department: { type: 'mongoId' }
+  assignedEmployee: { required: true, type: 'mongoId' },
+  assignedTeamLead: { type: 'mongoId' },
+  priority: { type: 'string', enum: ['High', 'Medium', 'Low'] },
+  startDate: { required: true, type: 'date' },
+  dueDate: { required: true, type: 'date' },
+  status: { type: 'string', enum: ['To Do', 'In Progress', 'Review', 'Completed', 'On Hold', 'Cancelled'] },
+  completionDate: { type: 'date' },
+  completionRemarks: { type: 'string' },
+  remarks: { type: 'string' },
+  department: { type: 'mongoId' },
+  internalNotes: { type: 'string' },
+  clientVisible: { type: 'string', enum: ['Yes', 'No'] },
 };
 
 export const blogSchema = {

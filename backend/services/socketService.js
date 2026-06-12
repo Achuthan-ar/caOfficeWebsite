@@ -140,3 +140,33 @@ export const emitNotificationCreated = (notification, recipientId) => {
   if (!io) return;
   io.to(`user:${recipientId}`).emit('notificationCreated', notification);
 };
+
+// Emit taskCreated event
+export const emitTaskCreated = (task) => {
+  if (!io) return;
+  const target = io.to('role:Admin').to('role:Manager').to('role:TL').to('role:Employee').to('role:Intern');
+  if (task.clientId) {
+    const clientUser = task.clientId.user || task.clientId;
+    const clientUserId = clientUser._id || clientUser;
+    if (clientUserId) target.to(`user:${clientUserId.toString()}`);
+  }
+  target.emit('taskCreated', task);
+};
+
+// Emit taskUpdated event
+export const emitTaskUpdated = (task) => {
+  if (!io) return;
+  const target = io.to('role:Admin').to('role:Manager').to('role:TL').to('role:Employee').to('role:Intern');
+  if (task.clientId) {
+    const clientUser = task.clientId.user || task.clientId;
+    const clientUserId = clientUser._id || clientUser;
+    if (clientUserId) target.to(`user:${clientUserId.toString()}`);
+  }
+  target.emit('taskUpdated', task);
+};
+
+// Emit taskDeleted event
+export const emitTaskDeleted = (taskId) => {
+  if (!io) return;
+  io.emit('taskDeleted', { taskId });
+};

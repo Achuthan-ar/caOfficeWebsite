@@ -13,13 +13,25 @@ const ClientDashboard = () => {
   // Document upload form state
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [docName, setDocName] = useState('');
-  const [docType, setDocType] = useState('GST documents');
+  const [docType, setDocType] = useState('GST');
   const [docUrl, setDocUrl] = useState('');
   const [uploadError, setUploadError] = useState('');
   const [uploadLoading, setUploadLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadMethod, setUploadMethod] = useState('local'); // 'local' or 'link'
   const [isDragOver, setIsDragOver] = useState(false);
+  const [activeRequestToUpload, setActiveRequestToUpload] = useState(null);
+
+  const handleOpenUploadForRequest = (reqObj) => {
+    setUploadError('');
+    setDocName(reqObj.documentName);
+    setDocType(reqObj.category);
+    setDocUrl('');
+    setSelectedFile(null);
+    setUploadMethod('local');
+    setActiveRequestToUpload(reqObj);
+    setIsUploadModalOpen(true);
+  };
 
   const fetchDashboard = async () => {
     try {
@@ -106,16 +118,25 @@ const ClientDashboard = () => {
         }
       }
 
-      const res = await api.post('/clients/documents', {
-        name: docName,
-        documentType: docType,
-        fileUrl: finalDocUrl
-      });
+      let res;
+      if (activeRequestToUpload) {
+        res = await api.put(`/document-requests/${activeRequestToUpload._id}/upload`, {
+          fileName: docName,
+          fileUrl: finalDocUrl
+        });
+      } else {
+        res = await api.post('/clients/documents', {
+          name: docName,
+          documentType: docType,
+          fileUrl: finalDocUrl
+        });
+      }
 
       if (res.data?.success) {
         setDocName('');
         setDocUrl('');
         setSelectedFile(null);
+        setActiveRequestToUpload(null);
         setIsUploadModalOpen(false);
         await fetchDashboard();
       }
@@ -148,7 +169,7 @@ const ClientDashboard = () => {
     );
   }
 
-  const { client, documents } = data;
+  const { client, documents, documentRequests = [] } = data;
 
   // Split documents into My Uploads (Client uploaded) vs. Firm Uploads (Staff uploaded)
   const clientUploaded = documents.filter(d => d.uploadedBy?.role?.name === 'Client');
@@ -175,10 +196,14 @@ const ClientDashboard = () => {
   };
 
   const docTypeBadgeColors = {
-    'GST documents': 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20',
-    'ITR documents': 'bg-sky-500/10 text-sky-500 border border-sky-500/20',
-    'Audit reports': 'bg-purple-500/10 text-purple-500 border border-purple-500/20',
-    'Financial statements': 'bg-amber-500/10 text-amber-500 border border-amber-500/20',
+    'GST': 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20',
+    'Income Tax': 'bg-sky-500/10 text-sky-500 border border-sky-500/20',
+    'Audit': 'bg-purple-500/10 text-purple-500 border border-purple-500/20',
+    'ROC': 'bg-rose-500/10 text-rose-500 border border-rose-500/20',
+    'Payroll': 'bg-teal-500/10 text-teal-500 border border-teal-500/20',
+    'KYC': 'bg-blue-500/10 text-blue-500 border border-blue-500/20',
+    'Compliance': 'bg-amber-500/10 text-amber-500 border border-amber-500/20',
+    'Others': 'bg-slate-500/10 text-slate-500 border border-slate-500/20',
   };
 
   const docStatusBadgeColors = {
@@ -212,6 +237,7 @@ const ClientDashboard = () => {
             setDocUrl('');
             setSelectedFile(null);
             setUploadMethod('local');
+            setActiveRequestToUpload(null);
             setIsUploadModalOpen(true);
           }}
           className="bg-indigo-500 hover:bg-indigo-650 text-white rounded-xl py-2.5 px-4 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-md shadow-indigo-500/10"
@@ -385,9 +411,94 @@ const ClientDashboard = () => {
 
         {/* Right Column: Documents Exchange Panels */}
         <div className="lg:col-span-2 space-y-6">
+          {/* Outstanding Document Requests */}
+          <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-6 rounded-xl shadow-xs space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-sm font-bold text-slate-855 dark:text-white font-heading">
+                Outstanding Document Requests
+              </h3>
+              <span className="bg-rose-500/10 text-rose-500 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                {documentRequests.filter(r => ['Requested', 'Re-upload Required', 'Overdue', 'Escalated', 'Rejected'].includes(r.status)).length} Pending
+              </span>
+            </div>
+
+            {documentRequests.length === 0 ? (
+              <div className="text-center py-8 text-xs text-slate-450 italic border border-dashed border-slate-200 dark:border-slate-800 rounded-xl p-6">
+                No active document requests from CA staff.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {documentRequests.map((req) => (
+                  <div
+                    key={req._id}
+                    className="border border-slate-200 dark:border-slate-850 p-4 rounded-xl space-y-3 bg-slate-50/50 dark:bg-slate-955/20"
+                  >
+                    <div className="flex justify-between items-start flex-wrap gap-2">
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className={`inline-block rounded-full px-2 py-0.2 text-[8px] font-bold uppercase tracking-wider ${
+                            req.priority === 'Critical' ? 'bg-red-500/10 text-red-500 border border-red-500/20 animate-pulse' :
+                            req.priority === 'High' ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20' :
+                            'bg-indigo-500/10 text-indigo-500 border border-indigo-500/20'
+                          }`}>
+                            {req.category} • {req.priority}
+                          </span>
+                          <span className="text-[10px] text-slate-400 font-medium">({req.requestId})</span>
+                        </div>
+                        <h4 className="text-xs font-bold text-slate-800 dark:text-white mt-1.5">
+                          {req.documentName}
+                        </h4>
+                      </div>
+
+                      <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                        req.status === 'Approved' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
+                        req.status === 'Uploaded' ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' :
+                        req.status === 'Overdue' ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20 animate-pulse' :
+                        req.status === 'Escalated' ? 'bg-red-500/10 text-red-500 border border-red-500/20 animate-pulse' :
+                        req.status === 'Re-upload Required' ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20' :
+                        'bg-slate-100 text-slate-500 dark:bg-slate-900'
+                      }`}>
+                        {req.status}
+                      </span>
+                    </div>
+
+                    {req.description && (
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-normal bg-slate-100/50 dark:bg-slate-900/40 p-2.5 rounded-lg border border-slate-200/40 dark:border-slate-800/40">
+                        {req.description}
+                      </p>
+                    )}
+
+                    <div className="flex justify-between items-center flex-wrap gap-2 text-[10px] text-slate-400 font-semibold pt-1">
+                      <span>Due Date: {new Date(req.dueDate).toLocaleDateString()}</span>
+                      
+                      {['Requested', 'Re-upload Required', 'Overdue', 'Escalated', 'Rejected'].includes(req.status) ? (
+                        <button
+                          onClick={() => handleOpenUploadForRequest(req)}
+                          className="bg-indigo-500 hover:bg-indigo-650 text-white rounded-lg py-1 px-3 text-[10px] font-bold transition flex items-center gap-1 cursor-pointer shadow-sm shadow-indigo-500/10"
+                        >
+                          <Upload className="h-3 w-3" />
+                          Upload File
+                        </button>
+                      ) : req.uploadedDocument ? (
+                        <a
+                          href={req.uploadedDocument.fileUrl || '#'}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-indigo-500 hover:underline"
+                        >
+                          <ExternalLink className="h-3 w-3" /> Check Uploaded File
+                        </a>
+                      ) : null}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Firm Uploads: Official CA sheets, statements and reports */}
           <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-6 rounded-xl shadow-xs space-y-4">
-            <h3 className="text-sm font-bold text-slate-850 dark:text-white font-heading">
+            <h3 className="text-sm font-bold text-slate-855 dark:text-white font-heading">
               Finalized Filings & Reports Issued by Firm
             </h3>
 
@@ -495,10 +606,13 @@ const ClientDashboard = () => {
           <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 w-full max-w-md rounded-2xl shadow-2xl p-6 relative space-y-6">
             <div className="flex justify-between items-center">
               <h3 className="text-base font-bold text-slate-850 dark:text-white font-heading">
-                Upload Compliance Document
+                {activeRequestToUpload ? `Respond to Request: ${activeRequestToUpload.documentName}` : 'Upload Compliance Document'}
               </h3>
               <button
-                onClick={() => setIsUploadModalOpen(false)}
+                onClick={() => {
+                  setIsUploadModalOpen(false);
+                  setActiveRequestToUpload(null);
+                }}
                 className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition cursor-pointer"
               >
                 <X className="h-5 w-5" />
@@ -531,14 +645,19 @@ const ClientDashboard = () => {
                   Document Category / Type *
                 </label>
                 <select
+                  disabled={!!activeRequestToUpload}
                   value={docType}
                   onChange={(e) => setDocType(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl py-2 px-3 text-xs text-slate-700 dark:text-slate-200 focus:outline-none cursor-pointer"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl py-2 px-3 text-xs text-slate-700 dark:text-slate-200 focus:outline-none cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  <option value="GST documents">GST documents</option>
-                  <option value="ITR documents">ITR documents</option>
-                  <option value="Audit reports">Audit reports</option>
-                  <option value="Financial statements">Financial statements</option>
+                  <option value="GST">GST Documents</option>
+                  <option value="Income Tax">ITR Documents</option>
+                  <option value="Audit">Audit Reports</option>
+                  <option value="ROC">ROC Filings</option>
+                  <option value="Payroll">Payroll Docs</option>
+                  <option value="KYC">KYC Documents</option>
+                  <option value="Compliance">Compliance Documents</option>
+                  <option value="Others">Others</option>
                 </select>
               </div>
 
@@ -661,7 +780,10 @@ const ClientDashboard = () => {
               <div className="flex gap-3 justify-end pt-2">
                 <button
                   type="button"
-                  onClick={() => setIsUploadModalOpen(false)}
+                  onClick={() => {
+                    setIsUploadModalOpen(false);
+                    setActiveRequestToUpload(null);
+                  }}
                   className="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-805 rounded-xl px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition cursor-pointer"
                 >
                   Cancel

@@ -12,6 +12,12 @@ const auditLogSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    userName: {
+      type: String,
+    },
+    userRole: {
+      type: String,
+    },
     details: {
       type: String,
       required: true,

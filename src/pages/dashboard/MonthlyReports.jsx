@@ -25,8 +25,8 @@ const MonthlyReports = () => {
   const [filterMonth, setFilterMonth] = useState(new Date().toISOString().slice(0, 7));
   const [filterEmployee, setFilterEmployee] = useState('');
 
-  const isHR = ['Admin', 'Manager'].includes(user?.role?.name);
-  const isTL = user?.role?.name === 'TL';
+  const isHR = ['Admin', 'CA Login'].includes(user?.role?.name);
+  const isManager = user?.role?.name === 'Manager';
 
   const fetchData = useCallback(async () => {
     try {
@@ -43,7 +43,7 @@ const MonthlyReports = () => {
       if (isHR) {
         queries.push(api.get('/employees'));
       }
-      if (isHR || isTL) {
+      if (isHR || isManager) {
         queries.push(api.get(`/reports/teams?month=${filterMonth || new Date().toISOString().slice(0, 7)}`));
       }
 
@@ -59,7 +59,7 @@ const MonthlyReports = () => {
 
       // Map team comparative stats
       const teamIdx = isHR ? 2 : 1;
-      if ((isHR || isTL) && results[teamIdx]?.data?.success) {
+      if ((isHR || isManager) && results[teamIdx]?.data?.success) {
         setTeamStats(results[teamIdx].data.data);
       }
 
@@ -69,7 +69,7 @@ const MonthlyReports = () => {
     } finally {
       setLoading(false);
     }
-  }, [filterMonth, filterEmployee, isHR, isTL]);
+  }, [filterMonth, filterEmployee, isHR, isManager]);
 
   useEffect(() => {
     fetchData();
@@ -234,7 +234,7 @@ const MonthlyReports = () => {
       </div>
 
       {/* Analytics Visualization Grid - hidden in print */}
-      {(isHR || isTL) && teamStats.length > 0 && (
+      {(isHR || isManager) && teamStats.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 print:hidden">
           {/* Chart: Comparative Department Averages */}
           <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-xl shadow-xs space-y-4">

@@ -17,7 +17,7 @@ const ServiceRequests = () => {
   const { socket } = useNotificationStore();
 
   const isClient = user?.role?.name === 'Client';
-  const canAssignSpecialist = ['Manager', 'TL'].includes(user?.role?.name);
+  const canAssignSpecialist = ['CA Login', 'Manager'].includes(user?.role?.name);
 
   const [tickets, setTickets] = useState([]);
   const [employees, setEmployees] = useState([]);

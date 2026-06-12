@@ -5,7 +5,7 @@ import { protect, authorize } from '../middleware/authMiddleware.js';
 const router = express.Router();
 
 router.get('/', getCategories);
-router.post('/', protect, authorize('Admin', 'Manager', 'TL'), createCategory);
+router.post('/', protect, authorize('Admin', 'CA Login', 'Manager'), createCategory);
 router.delete('/:id', protect, authorize('Admin'), deleteCategory);
 
 export default router;

@@ -65,7 +65,7 @@ export const createTicket = async (req, res) => {
         title: 'New Support Ticket Created',
         message: `Client ${client.companyName} created ticket ${ticketNumber}: "${title}".`,
         type: 'Ticket',
-        link: '/applications', // dashboard support tracker
+        link: '/service-requests', // dashboard support tracker
       });
     }
 
@@ -181,7 +181,7 @@ export const addComment = async (req, res) => {
           title: 'New Support Ticket Reply',
           message: `Client replied in ${ticket.ticketNumber}: "${comment.slice(0, 50)}..."`,
           type: 'Ticket',
-          link: '/applications',
+          link: '/service-requests',
         });
       }
     } else {
@@ -273,7 +273,7 @@ export const updateTicketStatus = async (req, res) => {
           title: 'New Support Ticket Assigned',
           message: `You have been assigned support ticket: ${ticket.ticketNumber} ("${ticket.title}").`,
           type: 'Ticket',
-          link: '/applications',
+          link: '/service-requests',
         });
       }
     }
@@ -309,6 +309,6 @@ export const updateTicketStatus = async (req, res) => {
 
 // Helper: Resolve Admin, Manager, and TL roles for routing alerts
 const getReviewerRoles = async () => {
-  const roles = await Role.find({ name: { $in: ['Admin', 'Manager', 'TL'] } });
+  const roles = await Role.find({ name: { $in: ['Admin', 'CA Login', 'Manager'] } });
   return roles.map(r => r._id);
 };

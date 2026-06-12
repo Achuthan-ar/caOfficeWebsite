@@ -18,6 +18,7 @@ import {
   Bell,
   Receipt,
   RotateCw,
+  Briefcase,
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -33,14 +34,14 @@ const Dashboard = () => {
     setError('');
     try {
       const roleName = user?.role?.name;
-      const roleLower = roleName?.toLowerCase();
+      const roleLower = roleName === 'CA Login' ? 'ca-login' : roleName?.toLowerCase();
       
       const dashboardPromise = api.get(`/dashboard/${roleLower}`);
       let attendancePromise = Promise.resolve(null);
 
-      if (roleName === 'Admin' || roleName === 'Manager') {
+      if (roleName === 'Admin' || roleName === 'CA Login') {
         attendancePromise = api.get('/attendance/analytics');
-      } else if (roleName === 'TL' || roleName === 'Employee' || roleName === 'Intern') {
+      } else if (roleName === 'Manager' || roleName === 'Employee' || roleName === 'Intern') {
         attendancePromise = api.get('/attendance/stats');
       }
 
@@ -155,8 +156,8 @@ const Dashboard = () => {
 
       {/* Render Dynamic Dashboard based on user role */}
       {roleName === 'Admin' && <AdminDashboard data={dashboardData} attendanceData={attendanceData} />}
+      {roleName === 'CA Login' && <CALoginDashboard data={dashboardData} attendanceData={attendanceData} />}
       {roleName === 'Manager' && <ManagerDashboard data={dashboardData} attendanceData={attendanceData} />}
-      {roleName === 'TL' && <TLDashboard data={dashboardData} attendanceData={attendanceData} />}
       {roleName === 'Employee' && <EmployeeDashboard data={dashboardData} attendanceData={attendanceData} />}
       {roleName === 'Intern' && <InternDashboard data={dashboardData} attendanceData={attendanceData} />}
       {roleName === 'Client' && <ClientDashboard data={dashboardData} />}
@@ -172,6 +173,7 @@ const AdminDashboard = ({ data, attendanceData }) => {
     { title: 'System Status', value: data?.systemStatus || 'Healthy', icon: Server, color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20' },
     { title: 'Active Sessions', value: data?.activeSessions || 0, icon: Activity, color: 'text-indigo-500 bg-indigo-500/10 border-indigo-500/20' },
     { title: 'Database Size', value: data?.dbSize || '0 MB', icon: HardDrive, color: 'text-amber-500 bg-amber-500/10 border-amber-500/20' },
+    { title: 'Hiring Requests', value: data?.hiringRequests || 0, icon: Briefcase, color: 'text-violet-500 bg-violet-500/10 border-violet-500/20', to: '/applications' },
   ];
 
   const maxPresent = attendanceData?.weeklyTrend 
@@ -181,20 +183,36 @@ const AdminDashboard = ({ data, attendanceData }) => {
   return (
     <div className="space-y-6">
       {/* Top Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, i) => {
           const Icon = stat.icon;
+          const CardContent = (
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{stat.title}</p>
+                <p className="text-2xl font-black text-slate-800 dark:text-white mt-1.5 font-heading">{stat.value}</p>
+              </div>
+              <div className={`p-3 rounded-lg border ${stat.color}`}>
+                <Icon className="h-5 w-5" />
+              </div>
+            </div>
+          );
+
+          if (stat.to) {
+            return (
+              <Link
+                key={i}
+                to={stat.to}
+                className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-xl p-5 shadow-sm transition-all hover:shadow-md hover:border-indigo-500/20 block cursor-pointer"
+              >
+                {CardContent}
+              </Link>
+            );
+          }
+
           return (
             <div key={i} className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-xl p-5 shadow-sm transition-all hover:shadow-md">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{stat.title}</p>
-                  <p className="text-2xl font-black text-slate-800 dark:text-white mt-1.5 font-heading">{stat.value}</p>
-                </div>
-                <div className={`p-3 rounded-lg border ${stat.color}`}>
-                  <Icon className="h-5 w-5" />
-                </div>
-              </div>
+              {CardContent}
             </div>
           );
         })}
@@ -367,13 +385,14 @@ const AdminDashboard = ({ data, attendanceData }) => {
 };
 
 /* ============================================================================
-   MANAGER DASHBOARD WIDGET
+   CA LOGIN DASHBOARD WIDGET
    ============================================================================ */
-const ManagerDashboard = ({ data, attendanceData }) => {
+const CALoginDashboard = ({ data, attendanceData }) => {
   const stats = [
     { title: 'Active Projects', value: data?.activeProjects || 0, icon: FolderKanban, color: 'text-indigo-500 bg-indigo-500/10 border-indigo-500/20' },
     { title: 'Budget Utilized', value: data?.budgetUtilized || '0%', icon: TrendingUp, color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20' },
     { title: 'Impending Deadlines', value: data?.deadlinesImpending || 0, icon: Clock, color: 'text-rose-500 bg-rose-500/10 border-rose-500/20' },
+    { title: 'Hiring Requests', value: data?.hiringRequests || 0, icon: Briefcase, color: 'text-violet-500 bg-violet-500/10 border-violet-500/20', to: '/applications' },
   ];
 
   const maxPresent = attendanceData?.weeklyTrend 
@@ -383,20 +402,36 @@ const ManagerDashboard = ({ data, attendanceData }) => {
   return (
     <div className="space-y-6">
       {/* Top Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, i) => {
           const Icon = stat.icon;
-          return (
-            <div key={i} className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-xl p-5 shadow-sm hover:shadow-md transition-all">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{stat.title}</p>
-                  <p className="text-2xl font-black text-slate-800 dark:text-white mt-1.5 font-heading">{stat.value}</p>
-                </div>
-                <div className={`p-3 rounded-lg border ${stat.color}`}>
-                  <Icon className="h-5 w-5" />
-                </div>
+          const CardContent = (
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{stat.title}</p>
+                <p className="text-2xl font-black text-slate-800 dark:text-white mt-1.5 font-heading">{stat.value}</p>
               </div>
+              <div className={`p-3 rounded-lg border ${stat.color}`}>
+                <Icon className="h-5 w-5" />
+              </div>
+            </div>
+          );
+
+          if (stat.to) {
+            return (
+              <Link
+                key={i}
+                to={stat.to}
+                className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-xl p-5 shadow-sm hover:shadow-md transition-all hover:border-indigo-500/20 block cursor-pointer"
+              >
+                {CardContent}
+              </Link>
+            );
+          }
+
+          return (
+            <div key={i} className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-xl p-5 shadow-sm transition-all hover:shadow-md">
+              {CardContent}
             </div>
           );
         })}
@@ -554,9 +589,9 @@ const ManagerDashboard = ({ data, attendanceData }) => {
 };
 
 /* ============================================================================
-   TEAM LEAD (TL) DASHBOARD WIDGET
+   MANAGER DASHBOARD WIDGET
    ============================================================================ */
-const TLDashboard = ({ data, attendanceData }) => {
+const ManagerDashboard = ({ data, attendanceData }) => {
   return (
     <div className="space-y-6">
       {/* Attendance Stats for Team Lead */}
@@ -897,12 +932,12 @@ const ClientDashboard = ({ data }) => {
   const cards = [
     { title: 'Active Services', value: data?.stats?.activeServices || 0, icon: Server, color: 'text-indigo-500 bg-indigo-500/10 border-indigo-500/20' },
     { title: 'Pending Tasks', value: data?.stats?.pendingTasks || 0, icon: FolderKanban, color: 'text-amber-500 bg-amber-500/10 border-amber-500/20' },
-    { title: 'Pending Documents', value: data?.stats?.pendingDocuments || 0, icon: FileText, color: 'text-blue-500 bg-blue-500/10 border-blue-500/20' },
-    { title: 'Documents Requested', value: data?.stats?.documentsRequested || 0, icon: AlertCircle, color: 'text-rose-500 bg-rose-500/10 border-rose-500/20' },
+    { title: 'Pending Documents', value: data?.stats?.pendingDocuments || 0, icon: FileText, color: 'text-blue-500 bg-blue-500/10 border-blue-500/20', to: '/client-dashboard' },
+    { title: 'Documents Requested', value: data?.stats?.documentsRequested || 0, icon: AlertCircle, color: 'text-rose-500 bg-rose-500/10 border-rose-500/20', to: '/client-dashboard' },
     { title: 'Filed Returns', value: data?.stats?.filedReturns || 0, icon: Award, color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20' },
-    { title: 'Outstanding Invoices', value: data?.stats?.outstandingInvoices || 0, icon: Receipt, color: 'text-red-500 bg-red-500/10 border-red-500/20' },
-    { title: 'Open Tickets', value: data?.stats?.openTickets || 0, icon: Clock, color: 'text-orange-500 bg-orange-500/10 border-orange-500/20' },
-    { title: 'Notifications', value: data?.stats?.notifications || 0, icon: Bell, color: 'text-purple-500 bg-purple-500/10 border-purple-500/20' },
+    { title: 'Outstanding Invoices', value: data?.stats?.outstandingInvoices || 0, icon: Receipt, color: 'text-red-500 bg-red-500/10 border-red-500/20', to: '/billing-invoices' },
+    { title: 'Open Tickets', value: data?.stats?.openTickets || 0, icon: Clock, color: 'text-orange-500 bg-orange-500/10 border-orange-500/20', to: '/service-requests' },
+    { title: 'Notifications', value: data?.stats?.notifications || 0, icon: Bell, color: 'text-purple-500 bg-purple-500/10 border-purple-500/20', to: '/notifications-center' },
   ];
 
   return (
@@ -925,17 +960,33 @@ const ClientDashboard = ({ data }) => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         {cards.map((card, i) => {
           const Icon = card.icon;
-          return (
-            <div key={i} className="bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800/80 rounded-xl p-4.5 shadow-sm transition hover:shadow-md">
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="text-[9px] font-bold text-slate-450 uppercase tracking-wider block">{card.title}</span>
-                  <span className="text-xl font-black text-slate-800 dark:text-white mt-1 block font-heading">{card.value}</span>
-                </div>
-                <div className={`p-2.5 rounded-lg border shrink-0 ${card.color}`}>
-                  <Icon className="h-4.5 w-4.5" />
-                </div>
+          const CardContent = (
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-[9px] font-bold text-slate-455 uppercase tracking-wider block">{card.title}</span>
+                <span className="text-xl font-black text-slate-800 dark:text-white mt-1 block font-heading">{card.value}</span>
               </div>
+              <div className={`p-2.5 rounded-lg border shrink-0 ${card.color}`}>
+                <Icon className="h-4.5 w-4.5" />
+              </div>
+            </div>
+          );
+
+          if (card.to) {
+            return (
+              <Link
+                key={i}
+                to={card.to}
+                className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-xl p-4.5 shadow-sm transition hover:shadow-md hover:border-indigo-500/20 block cursor-pointer"
+              >
+                {CardContent}
+              </Link>
+            );
+          }
+
+          return (
+            <div key={i} className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-xl p-4.5 shadow-sm transition hover:shadow-md">
+              {CardContent}
             </div>
           );
         })}
@@ -959,7 +1010,7 @@ const ClientDashboard = ({ data }) => {
               Upload Document
             </Link>
             <Link
-              to="/document-requests"
+              to="/client-dashboard"
               className="p-3 text-center rounded-xl border border-amber-500/20 bg-amber-500/[0.02] hover:bg-amber-500/10 font-bold transition text-amber-500 cursor-pointer block"
             >
               View Pending Requests

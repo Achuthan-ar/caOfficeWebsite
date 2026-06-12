@@ -23,8 +23,8 @@ router.get('/stats', protect, getMyAttendanceStats);
 router.get('/my-history', protect, getMyAttendanceHistory);
 
 // Management endpoints (Admin and Manager only)
-router.get('/team-today', protect, authorize('Admin', 'Manager'), getTeamAttendanceToday);
-router.get('/analytics', protect, authorize('Admin', 'Manager'), getAttendanceAnalytics);
-router.get('/report', protect, authorize('Admin', 'Manager'), getMonthlyAttendanceReport);
+router.get('/team-today', protect, authorize('Admin', 'CA Login'), getTeamAttendanceToday);
+router.get('/analytics', protect, authorize('Admin', 'CA Login'), getAttendanceAnalytics);
+router.get('/report', protect, authorize('Admin', 'CA Login'), getMonthlyAttendanceReport);
 
 export default router;

@@ -117,7 +117,7 @@ const PublicLayout = () => {
       </main>
 
       {/* Public Footer */}
-      <footer className="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-900 py-12 px-6 transition-colors duration-300">
+      <footer className="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-900 pt-12 pb-15 px-6 transition-colors duration-300">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
           
           {/* Logo & Description */}
@@ -215,9 +215,14 @@ const PublicLayout = () => {
         </div>
 
         <div className="max-w-7xl mx-auto mt-10 pt-6 border-t border-slate-200 dark:border-slate-900 text-center text-xs text-slate-400 dark:text-slate-500">
-          <p>© {new Date().getFullYear()} D.K. NAGARAJAN & Co. All Rights Reserved. Pair programmed with Antigravity.</p>
+          <p>© {new Date().getFullYear()} D.K. NAGARAJAN & Co. All Rights Reserved</p>
         </div>
       </footer>
+
+      {/* Fixed Credits Bar */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100 backdrop-blur-md border-t border-slate-200 text-center py-2 text-[11px] font-medium text-gray-800">
+        PoweredBy Developers | from DKN Office
+      </div>
     </div>
   );
 };

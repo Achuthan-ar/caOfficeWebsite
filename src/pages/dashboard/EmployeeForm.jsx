@@ -167,7 +167,7 @@ const EmployeeForm = () => {
     );
   }
 
-  const roleOptions = ['Manager', 'TL', 'Employee', 'Intern'];
+  const roleOptions = ['CA Login', 'Manager', 'Employee', 'Intern'];
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">

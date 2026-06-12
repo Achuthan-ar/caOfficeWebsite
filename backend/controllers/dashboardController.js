@@ -6,6 +6,7 @@ import Ticket from '../models/Ticket.js';
 import Task from '../models/Task.js';
 import Notification from '../models/Notification.js';
 import User from '../models/User.js';
+import Application from '../models/Application.js';
 
 // @desc    Get Admin Dashboard Data
 // @route   GET /api/dashboard/admin
@@ -19,6 +20,8 @@ export const getAdminDashboard = async (req, res) => {
     const overdueDocs = await DocumentRequest.countDocuments({ status: 'Overdue' });
     const escalatedDocs = await DocumentRequest.countDocuments({ status: 'Escalated' });
     const completedTasks = await Task.countDocuments({ status: 'Completed' });
+    
+    const pendingApplications = await Application.countDocuments({ status: { $nin: ['Approved', 'Rejected'] } });
     
     const invoices = await Invoice.find({});
     const totalRevenue = invoices.reduce((sum, inv) => {
@@ -38,6 +41,7 @@ export const getAdminDashboard = async (req, res) => {
         overdueDocuments: overdueDocs,
         escalatedRequests: escalatedDocs,
         tasksCompleted: completedTasks,
+        hiringRequests: pendingApplications,
         revenueSummary: totalRevenue,
         recentLogs: [
           { time: 'Just now', user: 'admin@company.com', action: 'Compliance check run' },
@@ -51,23 +55,25 @@ export const getAdminDashboard = async (req, res) => {
   }
 };
 
-// @desc    Get Manager Dashboard Data
-// @route   GET /api/dashboard/manager
-// @access  Private (Admin, Manager)
-export const getManagerDashboard = async (req, res) => {
+// @desc    Get CA Login Dashboard Data
+// @route   GET /api/dashboard/ca-login or /api/dashboard/ca login
+// @access  Private (Admin, CA Login)
+export const getCALoginDashboard = async (req, res) => {
   try {
     const totalClients = await Client.countDocuments();
     const pendingDocs = await DocumentRequest.countDocuments({ status: 'Uploaded' });
     const escalatedDocs = await DocumentRequest.countDocuments({ status: 'Escalated' });
     const activeTasks = await Task.countDocuments({ status: { $ne: 'Completed' } });
+    const pendingApplications = await Application.countDocuments({ status: { $nin: ['Approved', 'Rejected'] } });
 
     res.json({
       success: true,
-      role: 'Manager',
+      role: 'CA Login',
       data: {
         activeProjects: activeTasks,
         budgetUtilized: '74%',
         deadlinesImpending: escalatedDocs,
+        hiringRequests: pendingApplications,
         projects: [
           { id: 'PRJ001', name: 'Apex Filing Retainer', progress: 85, status: 'On Track' },
           { id: 'PRJ002', name: 'ITR Filing Audit Check', progress: 40, status: 'At Risk' },
@@ -84,15 +90,15 @@ export const getManagerDashboard = async (req, res) => {
   }
 };
 
-// @desc    Get Team Lead Dashboard Data
-// @route   GET /api/dashboard/tl
-// @access  Private (Admin, Manager, TL)
-export const getTLDashboard = async (req, res) => {
+// @desc    Get Manager Dashboard Data
+// @route   GET /api/dashboard/manager
+// @access  Private (Admin, CA Login, Manager)
+export const getManagerDashboard = async (req, res) => {
   try {
     const sprintTasksCount = await Task.countDocuments({ assignedTo: req.user._id });
     res.json({
       success: true,
-      role: 'TL',
+      role: 'Manager',
       data: {
         teamName: 'GST Advisory Squad',
         sprintProgress: '68%',
@@ -110,7 +116,7 @@ export const getTLDashboard = async (req, res) => {
 
 // @desc    Get Employee Dashboard Data
 // @route   GET /api/dashboard/employee
-// @access  Private (Admin, Manager, TL, Employee)
+// @access  Private (Admin, CA Login, Manager, Employee)
 export const getEmployeeDashboard = async (req, res) => {
   try {
     const assignedTasks = await Task.find({ assignedTo: req.user._id });
@@ -140,7 +146,7 @@ export const getEmployeeDashboard = async (req, res) => {
 
 // @desc    Get Intern Dashboard Data
 // @route   GET /api/dashboard/intern
-// @access  Private (Admin, Manager, TL, Employee, Intern)
+// @access  Private (Admin, CA Login, Manager, Employee, Intern)
 export const getInternDashboard = async (req, res) => {
   try {
     res.json({

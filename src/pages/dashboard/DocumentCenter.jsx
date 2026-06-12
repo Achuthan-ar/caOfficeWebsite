@@ -15,6 +15,7 @@ import {
   X,
   AlertCircle,
   CheckCircle,
+  UploadCloud,
 } from 'lucide-react';
 
 const DocumentCenter = () => {
@@ -43,6 +44,10 @@ const DocumentCenter = () => {
   const [targetClientId, setTargetClientId] = useState('');
   const [uploading, setUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState('');
+  const [uploadMethod, setUploadMethod] = useState('local'); // 'local' | 'link'
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [uploadError, setUploadError] = useState('');
 
   const categories = ['GST', 'Income Tax', 'Audit', 'ROC', 'Payroll', 'KYC', 'Compliance', 'Others'];
 
@@ -84,10 +89,48 @@ const DocumentCenter = () => {
     fetchClients();
   }, [fetchDocuments, fetchClients]);
 
+  const handleFileChange = (file) => {
+    setUploadError('');
+    if (!file) return;
+
+    // Validate size (10MB limit)
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setUploadError('File size exceeds the 10MB limit. Please upload a smaller file.');
+      return;
+    }
+
+    // Validate format (pdf, doc, docx, xls, xlsx, csv)
+    const allowedExtensions = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.csv'];
+    const fileName = file.name.toLowerCase();
+    const isAllowed = allowedExtensions.some(ext => fileName.endsWith(ext));
+
+    if (!isAllowed) {
+      setUploadError('Invalid file format. Only PDF, Word, Excel, and CSV files are allowed.');
+      return;
+    }
+
+    setSelectedFile(file);
+
+    // Auto-fill document name if it's empty
+    if (!uploadName) {
+      const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+      setUploadName(baseName);
+    }
+  };
+
   const handleUpload = async (e) => {
     e.preventDefault();
-    if (!uploadName || !uploadUrl) {
-      setError('Please fill in all fields.');
+    if (!uploadName) {
+      setError('Please fill in the document title.');
+      return;
+    }
+    if (uploadMethod === 'link' && !uploadUrl) {
+      setError('Please fill in the download link URL.');
+      return;
+    }
+    if (uploadMethod === 'local' && !selectedFile) {
+      setError('Please select a file to upload.');
       return;
     }
     if (!isClient && !targetClientId) {
@@ -98,12 +141,32 @@ const DocumentCenter = () => {
     setUploading(true);
     setUploadSuccess('');
     setError('');
+    setUploadError('');
 
     try {
+      let finalDocUrl = uploadUrl;
+
+      if (uploadMethod === 'local') {
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+
+        const uploadRes = await api.post('/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+
+        if (uploadRes.data?.success) {
+          finalDocUrl = uploadRes.data.url;
+        } else {
+          throw new Error(uploadRes.data?.message || 'File upload failed');
+        }
+      }
+
       const payload = {
         name: uploadName,
         documentType: uploadCategory,
-        fileUrl: uploadUrl,
+        fileUrl: finalDocUrl,
       };
 
       if (!isClient) {
@@ -115,6 +178,7 @@ const DocumentCenter = () => {
         setUploadSuccess('Document uploaded successfully!');
         setUploadName('');
         setUploadUrl('');
+        setSelectedFile(null);
         fetchDocuments();
         setTimeout(() => {
           setIsUploadOpen(false);
@@ -123,7 +187,7 @@ const DocumentCenter = () => {
       }
     } catch (err) {
       console.error('Upload error:', err);
-      setError(err.response?.data?.message || 'Failed to upload document.');
+      setError(err.response?.data?.message || err.message || 'Failed to upload document.');
     } finally {
       setUploading(false);
     }
@@ -156,7 +220,15 @@ const DocumentCenter = () => {
           </p>
         </div>
         <button
-          onClick={() => setIsUploadOpen(true)}
+          onClick={() => {
+            setUploadError('');
+            setError('');
+            setUploadName('');
+            setUploadUrl('');
+            setSelectedFile(null);
+            setUploadMethod('local');
+            setIsUploadOpen(true);
+          }}
           className="inline-flex items-center gap-2 rounded-xl bg-indigo-500 text-white px-4 py-2 text-sm font-semibold hover:bg-indigo-600 transition shadow-lg shadow-indigo-500/15 cursor-pointer"
         >
           <Upload className="h-4 w-4" />
@@ -369,6 +441,13 @@ const DocumentCenter = () => {
               </div>
             )}
 
+            {uploadError && (
+              <div className="flex items-center gap-2 p-3.5 rounded-xl border border-rose-500/20 bg-rose-500/[0.02] text-rose-500 text-xs">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                <p>{uploadError}</p>
+              </div>
+            )}
+
             <form onSubmit={handleUpload} className="space-y-4 text-xs">
               {/* Category */}
               <div className="space-y-1.5">
@@ -415,18 +494,120 @@ const DocumentCenter = () => {
                 />
               </div>
 
-              {/* Mock Download Link URL */}
-              <div className="space-y-1.5">
-                <label className="font-bold text-slate-400 uppercase tracking-wider block">File Download URL</label>
-                <input
-                  type="url"
-                  placeholder="https://example.com/files/document.pdf"
-                  value={uploadUrl}
-                  onChange={(e) => setUploadUrl(e.target.value)}
-                  className="w-full p-2.5 border border-slate-200 dark:border-slate-800 bg-transparent rounded-lg text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500"
-                  required
-                />
+              {/* Upload Method Toggles */}
+              <div className="flex border-b border-slate-100 dark:border-slate-800 mb-4">
+                <button
+                  type="button"
+                  onClick={() => setUploadMethod('local')}
+                  className={`flex-1 py-2 text-xs font-bold transition border-b-2 text-center cursor-pointer ${
+                    uploadMethod === 'local'
+                      ? 'border-indigo-500 text-indigo-500'
+                      : 'border-transparent text-slate-400 hover:text-slate-600'
+                  }`}
+                >
+                  Local File
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setUploadMethod('link')}
+                  className={`flex-1 py-2 text-xs font-bold transition border-b-2 text-center cursor-pointer ${
+                    uploadMethod === 'link'
+                      ? 'border-indigo-500 text-indigo-500'
+                      : 'border-transparent text-slate-400 hover:text-slate-600'
+                  }`}
+                >
+                  Web Link (Google Drive / URL)
+                </button>
               </div>
+
+              {/* Local File Drop Zone */}
+              {uploadMethod === 'local' ? (
+                <div className="space-y-1.5">
+                  <label className="font-bold text-slate-400 uppercase tracking-wider block">Select File (Allowed: PDF, Word, Excel, CSV)</label>
+                  <div
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setIsDragOver(true);
+                    }}
+                    onDragLeave={() => setIsDragOver(false)}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setIsDragOver(false);
+                      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                        handleFileChange(e.dataTransfer.files[0]);
+                      }
+                    }}
+                    className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition duration-200 ${
+                      isDragOver
+                        ? 'border-indigo-500 bg-indigo-500/5'
+                        : 'border-slate-200 dark:border-slate-800 hover:border-indigo-500/30 bg-slate-50 dark:bg-slate-900/40'
+                    }`}
+                    onClick={() => document.getElementById('local-file-input').click()}
+                  >
+                    <input
+                      id="local-file-input"
+                      type="file"
+                      className="hidden"
+                      accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          handleFileChange(e.target.files[0]);
+                        }
+                      }}
+                    />
+                    
+                    {!selectedFile ? (
+                      <div className="space-y-2">
+                        <UploadCloud className="h-8 w-8 mx-auto text-slate-400 animate-pulse" />
+                        <p className="text-xs text-slate-600 dark:text-slate-400">
+                          <span className="font-bold text-indigo-500">Click to upload</span> or drag and drop
+                        </p>
+                        <p className="text-[10px] text-slate-400">
+                          PDF, DOC, DOCX, XLS, XLSX, or CSV (Max 10MB)
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-3 text-left bg-white dark:bg-slate-950 p-3 rounded-xl border border-slate-100 dark:border-slate-850">
+                        <div className="p-2 bg-indigo-500/10 text-indigo-500 rounded-lg">
+                          <FileText className="h-5 w-5" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-slate-750 dark:text-white truncate">
+                            {selectedFile.name}
+                          </p>
+                          <p className="text-[10px] text-slate-400">
+                            {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedFile(null);
+                          }}
+                          className="p-1 hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-400 hover:text-slate-650 rounded-lg transition cursor-pointer"
+                          title="Remove file"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                /* Mock Download Link URL */
+                <div className="space-y-1.5">
+                  <label className="font-bold text-slate-400 uppercase tracking-wider block">File Download URL</label>
+                  <input
+                    type="url"
+                    placeholder="https://example.com/files/document.pdf"
+                    value={uploadUrl}
+                    onChange={(e) => setUploadUrl(e.target.value)}
+                    className="w-full p-2.5 border border-slate-200 dark:border-slate-800 bg-transparent rounded-lg text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500"
+                    required
+                  />
+                </div>
+              )}
 
               <button
                 type="submit"

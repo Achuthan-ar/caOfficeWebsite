@@ -107,8 +107,8 @@ const EmployeeList = () => {
   const isAdmin = currentUser?.role?.name === 'Admin';
 
   const roleOptions = [
+    { value: 'CA Login', label: 'CA Login' },
     { value: 'Manager', label: 'Manager' },
-    { value: 'TL', label: 'Team Leader' },
     { value: 'Employee', label: 'Employee' },
     { value: 'Intern', label: 'Intern' },
   ];
@@ -241,8 +241,8 @@ const EmployeeList = () => {
 
                     const roleBadges = {
                       Admin: 'bg-red-500/10 text-red-500 border border-red-500/20',
-                      Manager: 'bg-amber-500/10 text-amber-500 border border-amber-500/20',
-                      TL: 'bg-indigo-500/10 text-indigo-500 border border-indigo-500/20',
+                      'CA Login': 'bg-amber-500/10 text-amber-500 border border-amber-500/20',
+                      Manager: 'bg-indigo-500/10 text-indigo-500 border border-indigo-500/20',
                       Employee: 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20',
                       Intern: 'bg-sky-500/10 text-sky-500 border border-sky-500/20',
                     };

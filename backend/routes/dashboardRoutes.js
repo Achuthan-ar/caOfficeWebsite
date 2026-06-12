@@ -1,8 +1,8 @@
 import express from 'express';
 import {
   getAdminDashboard,
+  getCALoginDashboard,
   getManagerDashboard,
-  getTLDashboard,
   getEmployeeDashboard,
   getInternDashboard,
   getClientDashboard,
@@ -14,19 +14,21 @@ const router = express.Router();
 // Admin-only dashboard
 router.get('/admin', protect, authorize('Admin'), getAdminDashboard);
 
-// Manager dashboard (Admin, Manager)
-router.get('/manager', protect, authorize('Admin', 'Manager'), getManagerDashboard);
+// CA Login dashboard (handles both 'ca login' and 'ca-login')
+router.get('/ca%20login', protect, authorize('Admin', 'CA Login'), getCALoginDashboard);
+router.get('/ca login', protect, authorize('Admin', 'CA Login'), getCALoginDashboard);
+router.get('/ca-login', protect, authorize('Admin', 'CA Login'), getCALoginDashboard);
 
-// Team Lead dashboard (Admin, Manager, TL)
-router.get('/tl', protect, authorize('Admin', 'Manager', 'TL'), getTLDashboard);
+// Manager dashboard (previously TL)
+router.get('/manager', protect, authorize('Admin', 'CA Login', 'Manager'), getManagerDashboard);
 
-// Employee dashboard (Admin, Manager, TL, Employee)
-router.get('/employee', protect, authorize('Admin', 'Manager', 'TL', 'Employee'), getEmployeeDashboard);
+// Employee dashboard
+router.get('/employee', protect, authorize('Admin', 'CA Login', 'Manager', 'Employee'), getEmployeeDashboard);
 
-// Intern dashboard (Admin, Manager, TL, Employee, Intern)
-router.get('/intern', protect, authorize('Admin', 'Manager', 'TL', 'Employee', 'Intern'), getInternDashboard);
+// Intern dashboard
+router.get('/intern', protect, authorize('Admin', 'CA Login', 'Manager', 'Employee', 'Intern'), getInternDashboard);
 
-// Client dashboard (Admin, Client)
+// Client dashboard
 router.get('/client', protect, authorize('Admin', 'Client'), getClientDashboard);
 
 export default router;

@@ -48,7 +48,7 @@ const TaskKanban = () => {
   const [attachmentLink, setAttachmentLink] = useState('');
   const [editLoading, setEditLoading] = useState(false);
 
-  const isPrivileged = ['Admin', 'Manager', 'TL'].includes(currentUser?.role?.name);
+  const isPrivileged = ['Admin', 'CA Login', 'Manager'].includes(currentUser?.role?.name);
   const isAdmin = currentUser?.role?.name === 'Admin';
 
   const fetchTasks = useCallback(async () => {
@@ -517,7 +517,7 @@ const TaskKanban = () => {
                 </div>
               )}
 
-              {/* Progress and status updater (Assignee / Admin / PM / TL) */}
+              {/* Progress and status updater (Assignee / Admin / CA Login / Manager) */}
               <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-xl border border-slate-200/50 dark:border-slate-850 space-y-4">
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-indigo-500" />

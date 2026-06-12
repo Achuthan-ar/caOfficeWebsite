@@ -152,24 +152,22 @@ const BlogForm = () => {
   }
 
   const roleName = user?.role?.name;
-  const isTL = roleName === 'TL';
+  const isManager = roleName === 'Manager';
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link
-            to="/blog-admin"
-            className="rounded-lg p-2 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors"
-          >
-            <ArrowLeft className="h-4.5 w-4.5" />
-          </Link>
-          <h2 className="text-xl font-bold text-slate-805 dark:text-white font-heading">
-            {isEditing ? 'Modify Bulletin' : 'Draft Compliance Update'}
-          </h2>
-        </div>
+      <div className="flex items-center gap-3">
+        <Link
+          to="/blog-admin"
+          className="rounded-lg p-2 border border-slate-200 dark:border-slate-805 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors"
+        >
+          <ArrowLeft className="h-4.5 w-4.5" />
+        </Link>
+        <h2 className="text-xl font-bold text-slate-805 dark:text-white font-heading">
+          {isEditing ? 'Modify Bulletin' : 'Draft Compliance Update'}
+        </h2>
       </div>
 
       {errorMsg && (
@@ -180,7 +178,7 @@ const BlogForm = () => {
       )}
 
       {successMsg && (
-        <div className="flex items-center gap-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-3 text-sm text-emerald-400">
+        <div className="flex items-center gap-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-3 text-sm text-emerald-450">
           <CheckCircle className="h-4.5 w-4.5" />
           {successMsg}
         </div>
@@ -199,7 +197,7 @@ const BlogForm = () => {
               type="text"
               {...register('title', { required: 'Title is required' })}
               placeholder="e.g., A Complete Guide to GST Filing for Businesses in 2026"
-              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl py-2.5 px-4 text-xs font-bold text-slate-800 dark:text-slate-250 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-205 dark:border-slate-800 rounded-xl py-2.5 px-4 text-xs font-bold text-slate-800 dark:text-slate-250 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             />
             {errors.title && <p className="mt-1 text-xs text-red-450">{errors.title.message}</p>}
           </div>
@@ -252,13 +250,13 @@ const BlogForm = () => {
               >
                 <option value="Draft">Draft</option>
                 <option value="Pending">Pending Review</option>
-                {/* Only Admin/Manager can directly publish blogs */}
-                {!isTL && <option value="Published">Published</option>}
+                {/* Only Admin/CA Login can directly publish blogs */}
+                {!isManager && <option value="Published">Published</option>}
                 <option value="Archived">Archived</option>
               </select>
-              {isTL && (
+              {isManager && (
                 <p className="mt-1.5 text-[10px] text-slate-400">
-                  * Team Leads submit as "Pending Review" for Manager publication.
+                  * Managers submit as "Pending Review" for CA Login publication.
                 </p>
               )}
             </div>
@@ -298,7 +296,7 @@ const BlogForm = () => {
           </div>
 
           {/* Admin features */}
-          {!isTL && (
+          {!isManager && (
             <div className="flex items-center gap-2.5 p-3 rounded-lg border border-slate-200/50 bg-slate-50/30 dark:border-slate-850">
               <input
                 type="checkbox"

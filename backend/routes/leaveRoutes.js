@@ -13,8 +13,8 @@ const router = express.Router();
 
 router.post('/', protect, validateSchema(leaveSchema), applyLeave);
 router.get('/my', protect, getMyLeaves);
-router.get('/', protect, authorize('Admin', 'Manager'), getAllLeaves);
-router.put('/:id/status', protect, authorize('Admin', 'Manager'), updateLeaveStatus);
+router.get('/', protect, authorize('Admin', 'CA Login'), getAllLeaves);
+router.put('/:id/status', protect, authorize('Admin', 'CA Login'), updateLeaveStatus);
 router.put('/:id/cancel', protect, cancelLeave);
 
 export default router;

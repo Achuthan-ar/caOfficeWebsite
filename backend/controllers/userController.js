@@ -32,7 +32,7 @@ export const getAllUsers = async (req, res) => {
 export const updateUserRole = async (req, res) => {
   const { role } = req.body;
 
-  if (!role || !['Admin', 'Manager', 'TL', 'Employee', 'Intern', 'Client'].includes(role)) {
+  if (!role || !['Admin', 'CA Login', 'Manager', 'Employee', 'Intern', 'Client'].includes(role)) {
     return res.status(400).json({ success: false, message: 'Invalid or missing role parameter' });
   }
 

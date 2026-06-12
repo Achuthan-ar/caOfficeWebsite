@@ -12,6 +12,6 @@ const router = express.Router();
 router.post('/', protect, authorize('Client'), createTicket);
 router.get('/', protect, getTickets);
 router.post('/:id/comments', protect, addComment);
-router.put('/:id', protect, authorize('Admin', 'Manager', 'TL', 'Employee'), updateTicketStatus);
+router.put('/:id', protect, authorize('Admin', 'CA Login', 'Manager', 'Employee'), updateTicketStatus);
 
 export default router;

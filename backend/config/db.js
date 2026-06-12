@@ -22,6 +22,7 @@ import DocumentRequest from '../models/DocumentRequest.js';
 import Invoice from '../models/Invoice.js';
 import Ticket from '../models/Ticket.js';
 import Compliance from '../models/Compliance.js';
+import AuditLog from '../models/AuditLog.js';
 
 // Helper to get local date string YYYY-MM-DD
 const getLocalDateString = (date = new Date()) => {
@@ -38,6 +39,9 @@ export const connectDB = async () => {
     
     // Seed DB
     await seedDB();
+
+    // Migrate roles hierarchy
+    await migrateRoles();
   } catch (error) {
     console.error(`Database connection error: ${error.message}`);
     process.exit(1);
@@ -85,13 +89,13 @@ const seedDB = async () => {
         permissions: [permissionsMap['full_access']],
       },
       {
-        name: 'Manager',
-        description: 'Operations Manager role',
+        name: 'CA Login',
+        description: 'CA Login (previously Manager)',
         permissions: [permissionsMap['operational_access']],
       },
       {
-        name: 'TL',
-        description: 'Team Leader role',
+        name: 'Manager',
+        description: 'Manager (previously Team Lead)',
         permissions: [permissionsMap['team_management']],
       },
       {
@@ -177,7 +181,7 @@ const seedDB = async () => {
           name: 'Project Manager',
           email: 'manager@company.com',
           password: 'password123',
-          role: rolesMap['Manager'],
+          role: rolesMap['CA Login'],
           employeeId: 'EMP002',
           phone: '+91 99999 22222',
           department: departmentsMap['Audit & Assurance'],
@@ -191,7 +195,7 @@ const seedDB = async () => {
           name: 'Team Lead',
           email: 'tl@company.com',
           password: 'password123',
-          role: rolesMap['TL'],
+          role: rolesMap['Manager'],
           employeeId: 'EMP003',
           phone: '+91 99999 33333',
           department: departmentsMap['Indirect Tax (GST)'],
@@ -1028,7 +1032,7 @@ const seedDB = async () => {
           requestId: 'REQ-2026-0002',
           client: clientProfile._id,
           requestedBy: tlUser?._id || usersList[0]._id,
-          requestedByRole: 'TL',
+          requestedByRole: 'Manager',
           documentName: 'Q4 Audited Balance Sheet 2025',
           category: 'Audit',
           description: 'Audited assets and capital balances worksheet.',
@@ -1041,7 +1045,7 @@ const seedDB = async () => {
           requestId: 'REQ-2026-0003',
           client: clientProfile._id,
           requestedBy: managerUser?._id || usersList[0]._id,
-          requestedByRole: 'Manager',
+          requestedByRole: 'CA Login',
           documentName: 'Bank Statement FY 25-26',
           category: 'Audit',
           description: 'Consolidated statement of active current accounts.',
@@ -1087,8 +1091,8 @@ const seedDB = async () => {
           comments: [
             {
               user: tlUser?._id || usersList[0]._id,
-              userName: tlUser?.name || 'Team Lead',
-              role: 'TL',
+              userName: tlUser?.name || 'Manager',
+              role: 'Manager',
               comment: 'We have analyzed the reserves transfer entries. It requires a note under Section 135 disclosures. Will send the draft text shortly.',
               timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000)
             }
@@ -1100,7 +1104,7 @@ const seedDB = async () => {
               timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000)
             },
             {
-              action: 'Ticket assigned to Team Lead',
+              action: 'Ticket assigned to Manager',
               performedBy: usersList[0]._id, // Admin
               timestamp: new Date(Date.now() - 18 * 60 * 60 * 1000)
             }
@@ -1113,5 +1117,85 @@ const seedDB = async () => {
 
   } catch (error) {
     console.error(`Error seeding database: ${error.message}`);
+  }
+};
+
+export const migrateRoles = async () => {
+  try {
+    // Check if the new role hierarchy is already present (from seed or previous migration)
+    const caLoginRoleExists = await Role.findOne({ name: 'CA Login' });
+    if (caLoginRoleExists) {
+      console.log('✓ Role hierarchy is already up-to-date (CA Login exists). Skipping migration.');
+      return;
+    }
+
+    console.log('Running role hierarchy renaming migration...');
+
+    // 1. Rename 'Manager' -> 'CA Login'
+    const managerRole = await Role.findOne({ name: 'Manager' });
+    if (managerRole) {
+      managerRole.name = 'CA Login';
+      managerRole.description = 'CA Login (previously Manager)';
+      await managerRole.save();
+      console.log("✓ Renamed Role 'Manager' to 'CA Login' in database.");
+    }
+
+    // 2. Rename 'TL' -> 'Manager'
+    const tlRole = await Role.findOne({ name: 'TL' });
+    if (tlRole) {
+      tlRole.name = 'Manager';
+      tlRole.description = 'Manager (previously Team Lead)';
+      await tlRole.save();
+      console.log("✓ Renamed Role 'TL' to 'Manager' in database.");
+    }
+
+    // 3. Migrate Document Requests requestedByRole string field
+    const docReqRes1 = await DocumentRequest.updateMany(
+      { requestedByRole: 'Manager' },
+      { $set: { requestedByRole: 'CA Login' } }
+    );
+    const docReqRes2 = await DocumentRequest.updateMany(
+      { requestedByRole: 'TL' },
+      { $set: { requestedByRole: 'Manager' } }
+    );
+    
+    // Migrate Document Requests approvalHistory array
+    const docReqRes3 = await DocumentRequest.updateMany(
+      { 'approvalHistory.role': 'Manager' },
+      { $set: { 'approvalHistory.$[elem].role': 'CA Login' } },
+      { arrayFilters: [{ 'elem.role': 'Manager' }] }
+    );
+    const docReqRes4 = await DocumentRequest.updateMany(
+      { 'approvalHistory.role': 'TL' },
+      { $set: { 'approvalHistory.$[elem].role': 'Manager' } },
+      { arrayFilters: [{ 'elem.role': 'TL' }] }
+    );
+    console.log(`✓ Updated Document Requests role strings in database.`);
+
+    // 4. Migrate Support Tickets comments array
+    const ticketRes1 = await Ticket.updateMany(
+      { 'comments.role': 'Manager' },
+      { $set: { 'comments.$[elem].role': 'CA Login' } },
+      { arrayFilters: [{ 'elem.role': 'Manager' }] }
+    );
+    const ticketRes2 = await Ticket.updateMany(
+      { 'comments.role': 'TL' },
+      { $set: { 'comments.$[elem].role': 'Manager' } },
+      { arrayFilters: [{ 'elem.role': 'TL' }] }
+    );
+    console.log(`✓ Updated Ticket Comments role strings in database.`);
+
+    // 5. Migrate Audit Logs userRole string field
+    const auditLogs1 = await AuditLog.updateMany(
+      { userRole: 'Manager' },
+      { $set: { userRole: 'CA Login' } }
+    );
+    const auditLogs2 = await AuditLog.updateMany(
+      { userRole: 'TL' },
+      { $set: { userRole: 'Manager' } }
+    );
+    console.log(`✓ Updated Audit Logs role strings in database.`);
+  } catch (err) {
+    console.error(`Migration error: ${err.message}`);
   }
 };

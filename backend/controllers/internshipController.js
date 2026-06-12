@@ -41,7 +41,7 @@ export const getMentorMentees = async (req, res) => {
     const query = {};
     
     // Non-Admin/Manager users can only view their assigned mentees
-    if (!['Admin', 'Manager'].includes(req.user.role.name)) {
+    if (!['Admin', 'CA Login'].includes(req.user.role.name)) {
       query.mentor = req.user._id;
     }
 
@@ -78,7 +78,7 @@ export const getInternshipDetails = async (req, res) => {
     // Authorization check: Intern, Mentor, Manager, or Admin
     const isIntern = internship.user._id.toString() === req.user._id.toString();
     const isMentor = internship.mentor._id.toString() === req.user._id.toString();
-    const isPrivileged = ['Admin', 'Manager'].includes(req.user.role.name);
+    const isPrivileged = ['Admin', 'CA Login'].includes(req.user.role.name);
 
     if (!isIntern && !isMentor && !isPrivileged) {
       return res.status(403).json({ success: false, message: 'Not authorized to view these internship details' });
@@ -177,7 +177,7 @@ export const reviewReport = async (req, res) => {
     // Verify relationship
     const internship = report.internship;
     const isMentor = internship.mentor.toString() === req.user._id.toString();
-    const isPrivileged = ['Admin', 'Manager'].includes(req.user.role.name);
+    const isPrivileged = ['Admin', 'CA Login'].includes(req.user.role.name);
 
     if (!isMentor && !isPrivileged) {
       return res.status(403).json({ success: false, message: 'Only the assigned mentor or HR can review this report.' });
@@ -233,7 +233,7 @@ export const assignTask = async (req, res) => {
 
     // Verify ownership
     const isMentor = internship.mentor.toString() === req.user._id.toString();
-    const isPrivileged = ['Admin', 'Manager'].includes(req.user.role.name);
+    const isPrivileged = ['Admin', 'CA Login'].includes(req.user.role.name);
 
     if (!isMentor && !isPrivileged) {
       return res.status(403).json({ success: false, message: 'Only the assigned mentor or HR can assign learning tasks.' });
@@ -300,7 +300,7 @@ export const updateTaskStatus = async (req, res) => {
     // Auth check
     const isIntern = internship.user.toString() === req.user._id.toString();
     const isMentor = internship.mentor.toString() === req.user._id.toString();
-    const isPrivileged = ['Admin', 'Manager'].includes(req.user.role.name);
+    const isPrivileged = ['Admin', 'CA Login'].includes(req.user.role.name);
 
     if (!isIntern && !isMentor && !isPrivileged) {
       return res.status(403).json({ success: false, message: 'Not authorized to modify this task.' });
@@ -364,7 +364,7 @@ export const generateCertificate = async (req, res) => {
 
     // Auth check
     const isMentor = internship.mentor.toString() === req.user._id.toString();
-    const isPrivileged = ['Admin', 'Manager'].includes(req.user.role.name);
+    const isPrivileged = ['Admin', 'CA Login'].includes(req.user.role.name);
 
     if (!isMentor && !isPrivileged) {
       return res.status(403).json({ success: false, message: 'Only the assigned mentor or HR can generate certificates.' });
@@ -441,7 +441,7 @@ export const getCertificate = async (req, res) => {
     const internship = certificate.internship;
     const isIntern = internship.user._id.toString() === req.user._id.toString();
     const isMentor = internship.mentor._id.toString() === req.user._id.toString();
-    const isPrivileged = ['Admin', 'Manager'].includes(req.user.role.name);
+    const isPrivileged = ['Admin', 'CA Login'].includes(req.user.role.name);
 
     if (!isIntern && !isMentor && !isPrivileged) {
       return res.status(403).json({ success: false, message: 'Not authorized to view this certificate' });

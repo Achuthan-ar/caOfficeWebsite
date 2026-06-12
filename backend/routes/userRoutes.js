@@ -15,8 +15,8 @@ const router = express.Router();
 router.put('/profile', protect, updateProfile);
 router.put('/change-password', protect, updateSelfPassword);
 
-// Get all users - Admin and Manager allowed
-router.get('/', protect, authorize('Admin', 'Manager'), getAllUsers);
+// Get all users - Admin and CA Login allowed
+router.get('/', protect, authorize('Admin', 'CA Login'), getAllUsers);
 
 // Update user role - Admin only
 router.put('/:id/role', protect, authorize('Admin'), updateUserRole);
