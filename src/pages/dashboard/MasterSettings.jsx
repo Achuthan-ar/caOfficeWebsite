@@ -680,8 +680,10 @@ const MasterSettings = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
           <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl w-full max-w-md overflow-hidden shadow-2xl animate-scaleUp text-xs">
             <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-900 bg-slate-50/50 dark:bg-slate-950/10 flex justify-between items-center select-none">
-              <h3 className="font-black text-slate-850 dark:text-white uppercase tracking-wider">
-                {modalMode === 'edit' ? 'Edit Option' : 'Add New Option'}
+              <h3 className="font-black text-slate-855 dark:text-white uppercase tracking-wider">
+                {modalMode === 'edit'
+                  ? (activeTab === 'accountants' ? 'Edit Associate Name' : 'Edit Option')
+                  : (activeTab === 'accountants' ? 'Add new associate name' : 'Add New Option')}
               </h3>
               <span className="text-[10px] text-indigo-500 font-extrabold capitalize">{tabs.find((t) => t.id === activeTab)?.label} Master</span>
             </div>
@@ -796,7 +798,7 @@ const MasterSettings = () => {
                   className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-500 text-white px-5 py-2 font-bold hover:bg-indigo-600 transition shadow-md shadow-indigo-500/10 cursor-pointer disabled:opacity-50"
                 >
                   {loading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                  Save Option
+                  {activeTab === 'accountants' ? 'Save Associate' : 'Save Option'}
                 </button>
               </div>
             </form>
